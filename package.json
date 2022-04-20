@@ -1,0 +1,24 @@
+{
+  "name": "deliverysystembackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "express": "4.17.3",
+    "mysql": "2.18.1",
+    "dotenv":"16.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aleksan18/DeliverySystem.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aleksan18/DeliverySystem/issues"
+  },
+  "homepage": "https://github.com/aleksan18/DeliverySystem#readme"
+}
