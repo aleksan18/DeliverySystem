@@ -2,10 +2,10 @@
 * generates pool connection to be used throughout the app
 */
 require("dotenv").config();
-import { createPool } from "mysql";
+const { createPool,createConnection } = require("mysql");
 
 let pool
-export const init = () => {
+const init = () => {
     try {
         pool = createPool({
             connectionLimit: process.env.MY_SQL_DB_CONNECTION_LIMIT
@@ -22,10 +22,17 @@ export const init = () => {
         throw new Error("failed to initialized pool");
     }
 };
-
-export const execute = (
-    query,
-    params
+/**
+ * executes SQL queries in MySQL db
+ *
+ * @param {string} query - provide a valid SQL query
+ * @param {string[] | object} params - provide the parameterized values used
+ * @return {Promise} Returns a promise of the same type as the provided model type in the query
+ * 
+ */
+const execute = (
+    query =String,
+    params = Array(String) | object,
   )=> {
     try {
       if (!pool)
@@ -33,7 +40,7 @@ export const execute = (
           "Pool was not created. Ensure pool is created when running the app."
         );
   
-      return new Promise<T>((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         pool.query(query, params, (error, results) => {
           if (error) reject(error);
           else resolve(results);
@@ -44,3 +51,8 @@ export const execute = (
       throw new Error("failed to execute MySQL query");
     }
   };
+
+  module.exports = {
+    init,
+    execute,
+  }
