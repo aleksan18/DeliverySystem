@@ -51,7 +51,7 @@ class Driver {
     equals(driver=new Driver){
         return driver.getIdEmployees() === this.#idemployees&&
                 driver.getFirstName() === this.#firstname&&
-                driver.getLastName() === this.#lastname &&
+                driver.getSecondName() === this.#secondname &&
                 driver.getEmail() === this.#email &&
                 driver.getPhone() === this.#phone &&
                 driver.getFree() === this.#free
