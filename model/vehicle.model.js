@@ -80,7 +80,7 @@ class Vehicle {
         if (newVehicle.equals(getUpdatedVehicle[0])) {
             const response = await execute(
                 "UPDATE vehicles"
-                +"SET(type_of_vehicles_idtype_of_vehicles=?,identifier=?,storage_size=?,free=?) WHERE idvehicles=?"
+                +" SET type_of_vehicles_idtype_of_vehicles=?,identifier=?,storage_size=?,free=? WHERE idvehicles=?"
                 ,[`${newVehicle.getTypeOfVehicle()}`
                 ,`${newVehicle.getIdentifier()}`,
                 `${newVehicle.getStorageSize()}`,

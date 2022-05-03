@@ -122,7 +122,7 @@ class Route {
         if (newRoute.equals(getUpdatedRoute[0])) {
             const response = await execute(
                 "UPDATE routes"
-                +"SET(vehicles_idvehicles=?,employees_idemployees=?,typeofroute_idtypeofroute=?,start_location=?,end_location=?,international=?,deliveries_iddeliveries=?,route_order=?,start_date=?,end_date=?) WHERE idroutes=?"
+                +"SET vehicles_idvehicles=?,employees_idemployees=?,typeofroute_idtypeofroute=?,start_location=?,end_location=?,international=?,deliveries_iddeliveries=?,route_order=?,start_date=?,end_date=? WHERE idroutes=?"
                 ,[`${newRoute.getIdVehicle()}`,
                 `${newRoute.getIdEmployees()}`,
                 `${newRoute.getTypeOfRoute()}`,
@@ -134,6 +134,7 @@ class Route {
                 `${newRoute.getStartDate()}`,
                 `${newRoute.getEndDate()}`,
                 `${newRoute.getIdRoutes}`])
+            console.log(response);
             return Object.assign(new Route(),getUpdatedRoute[0])
         }
     }
@@ -167,6 +168,7 @@ class Route {
         `${newRoute.getRouteOrder()}`
         `${newRoute.getStartDate()}`,
         `${newRoute.getEndDate()}`,])
+        console.log(response);
         return newRoute;
     }
 }
