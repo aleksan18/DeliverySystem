@@ -149,7 +149,7 @@ class Delivery {
         if (!newDelivery.equals(getUpdatedDelivery[0])) {
             const response = await execute(
                 "UPDATE deliveries"
-                +"SET(packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=?) WHERE iddeliveries=?"
+                +" SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?"
                 ,[`${newDelivery.getPackageId()}`
                 ,`${newDelivery.getPriority()}`,
                 `${newDelivery.getPaymentId()}`,

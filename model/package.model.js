@@ -138,7 +138,7 @@ class Package {
         if (!newPackage.equals(getUpdatedPackage[0])) {
             const response = await execute(
                 "UPDATE Packages"
-                +"SET(user_iduser=?,weight=?,height=?,width=?,depth=?,fragile=?,electronics=?,oddsized=?,receiver_iduser=?) WHERE idpackages=?"
+                +" SET user_iduser=?,weight=?,height=?,width=?,depth=?,fragile=?,electronics=?,oddsized=?,receiver_iduser=? WHERE idpackages=?"
                 ,[`${newPackage.getUserId()}`
                 ,`${newPackage.getWeight()}`,
                 `${newPackage.getHeight()}`,
