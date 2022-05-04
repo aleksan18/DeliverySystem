@@ -8,6 +8,6 @@ BEGIN
   UPDATE user
 	SET last_activity_date = get_last_activity_date(user.iduser);
   DELETE FROM user WHERE user.last_activity_date < DATE_SUB(NOW(), INTERVAL 3 YEAR);
-  END$$
-  DELIMITER ;
+END$$
+DELIMITER ;
   

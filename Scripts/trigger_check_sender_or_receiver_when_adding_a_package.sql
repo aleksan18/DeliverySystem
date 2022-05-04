@@ -12,8 +12,6 @@ CREATE TRIGGER check_sender_or_receiver_when_adding_a_package
 			SIGNAL SQLSTATE '45000'
 				SET MESSAGE_TEXT = 'the id of the receiver does not exist!';
           END IF;
-     END;
-$$
+     END$$
 
 DELIMITER ;
-

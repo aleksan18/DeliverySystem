@@ -1,5 +1,5 @@
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `calculateAmount`(
+CREATE FUNCTION `calculateAmount`(
 	idpackage int
 ) RETURNS float
     DETERMINISTIC

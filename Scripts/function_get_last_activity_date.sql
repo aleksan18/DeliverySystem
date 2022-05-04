@@ -1,6 +1,5 @@
 use postnord; 
 DELIMITER $$
-
 CREATE FUNCTION get_last_activity_date(
 	user_id INT
 ) 

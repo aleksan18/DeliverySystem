@@ -1,4 +1,5 @@
-CREATE DEFINER=`root`@`localhost` FUNCTION `calculateVolume`(
+DELIMITER$$
+CREATE FUNCTION `calculateVolume`(
 idpackage int 
 ) RETURNS float
     DETERMINISTIC
@@ -13,4 +14,5 @@ from packages
 where idpackage = idpackages;
 SET volume = packageHeight*packageWidth*packageDepth;
 RETURN volume;
-END
+END$$
+DELIMITER ;
