@@ -99,36 +99,57 @@ class Package {
      * Gets an array, every item in the array is an instance of Package class
      * 
      */
-    static async getAllPackages() {
-        const response = await execute("SELECT * FROM packages", []);
-        return response.map(v => Object.assign(new Package(), v));
+    static async getAllPackages (){
+    const response = await execute("SELECT * FROM Packages",[]);
+    return response.map(v => 
+        new Package(
+        v.idpackages,
+        v.user_iduser,
+        v.weight,
+        v.height,
+        v.width,
+        v.depth,
+        v.fragile,
+        v.electronics,
+        v.oddsized,
+        v.receiver_id));
     }
     /**
      * The function get a 1 Package from the database with the provided id 
      * 
      * @param {Number} id - provide an id with which to query the database
      */
-    static async getPackage(id = Number) {
-
-        const response = await execute("SELECT * FROM packages WHERE idpackages=?", [`${id}`])
-
-        return Object.assign(new Package(), response[0])
-
+    static async getPackage(id=Number) {
+        
+        const response= await execute("SELECT * FROM Packages WHERE idpackages=?",[`${id}`])
+        
+        return new Package(
+            response[0].idpackages,
+            response[0].user_iduser,
+            response[0].weight,
+            response[0].height,
+            response[0].width,
+            response[0].depth,
+            response[0].fragile,
+            response[0].electronics,
+            response[0].oddsized,
+            response[0].receiver_id)
+    
     }
     /**
      * 
      * @returns 
      */
-    static async updatePackage(
-        newPackage = new Package
+    static async updatePackage (
+        newPackage= Package
     ) {
-        const getUpdatedPackage = await execute("SELECT * FROM packages WHERE idpackages=?", [`${newPackage.getIdPackages()}`])
-        if (newPackage.equals(getUpdatedPackage[0])) {
+        const getUpdatedPackage = await execute("SELECT * FROM Packages WHERE idpackages=?",[`${newPackage.getIdPackages()}`])
+        if (!newPackage.equals(getUpdatedPackage[0])) {
             const response = await execute(
-                "UPDATE packages"
-                + "SET(user_iduser=?,weight=?,height=?,width=?,depth=?,fragile=?,electronics=?,oddsized=?,receiver_iduser=?) WHERE idpackages=?"
-                , [`${newPackage.getUserId()}`
-                    , `${newPackage.getWeight()}`,
+                "UPDATE Packages"
+                +" SET user_iduser=?,weight=?,height=?,width=?,depth=?,fragile=?,electronics=?,oddsized=?,receiver_iduser=? WHERE idpackages=?"
+                ,[`${newPackage.getUserId()}`
+                ,`${newPackage.getWeight()}`,
                 `${newPackage.getHeight()}`,
                 `${newPackage.getWidth()}`,
                 `${newPackage.getDepth()}`,
@@ -137,7 +158,19 @@ class Package {
                 `${newPackage.getOddSized()}`,
                 `${newPackage.getReceiverId()}`,
                 `${newPackage.getIdPackages}`,])
-            return Object.assign(new Package(), getUpdatedPackage[0])
+            return new Package(
+                getUpdatedPackage[0].idpackages,
+                getUpdatedPackage[0].user_iduser,
+                getUpdatedPackage[0].weight,
+                getUpdatedPackage[0].height,
+                getUpdatedPackage[0].width,
+                getUpdatedPackage[0].depth,
+                getUpdatedPackage[0].fragile,
+                getUpdatedPackage[0].electronics,
+                getUpdatedPackage[0].oddsized,
+                getUpdatedPackage[0].receiver_id)
+        }else{
+            return "Package was not updated, because the package info is the same"
         }
 
     }
@@ -146,18 +179,28 @@ class Package {
      * @param {number} id provide the id with which to delete a Package from the database with
      * @returns the deleted Package item and if it was successful
      */
-    static async deletePackage(id = Number) {
-        const getDeletedPackage = await execute("SELECT FROM packages WHERE idpackages=", [`${id}`]);
-        const response = await execute("DELETE FROM packages WHERE idpackages=", [`${id}`]);
-        return Object.assign(new Package(), getDeletedPackage[0])
+    static async deletePackage  (id=Number) {
+        const getDeletedPackage = await execute("SELECT from Packages Where idpackages=",[`${id}`]);
+        const response = await execute("DELETE from Packages Where idpackages=",[`${id}`]);
+        return new Package(
+            getDeletedPackage[0].idpackages,
+            getDeletedPackage[0].user_iduser,
+            getDeletedPackage[0].weight,
+            getDeletedPackage[0].height,
+            getDeletedPackage[0].width,
+            getDeletedPackage[0].depth,
+            getDeletedPackage[0].fragile,
+            getDeletedPackage[0].electronics,
+            getDeletedPackage[0].oddsized,
+            getDeletedPackage[0].receiver_id)
     }
-    /**
-      * Creates a new Package entry in the database
-      * @param {Package} newPackage Provide the new Package to create in the database 
-      * @returns  Return the newly created Package
-      */
-    static async createPackage(
-        newPackage = new Package
+   /**
+     * Creates a new Package entry in the database
+     * @param {Package} newPackage Provide the new Package to create in the database 
+     * @returns  Return the newly created Package
+     */
+    static async createPackages (
+        newPackage= Package
     ) {
         const response = await execute("INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
             + "VALUES (?,?,?,?,?,?,?,?,?);",

@@ -1,7 +1,6 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
-const { execute } = require("../database/mysql.connector.js");
-// const {checker} = require("../utility/argumentChecker");
-
+const {execute} = require("../database/mysql.connector.js");
+const {checker} = require("../utility/argumentChecker");
 class Delivery {
     #iddeliveries;
     #packages_idpackages;
@@ -112,34 +111,56 @@ class Delivery {
      * Gets an array, every item in the array is an instance of delivery class
      * 
      */
-    static async getAllDeliveries() {
-        const response = await execute("SELECT * FROM deliveries", []);
-        console.log("response: ", response);
-        return response.map(v => Object.assign(new Delivery(), v));
+    static async getAllDeliveries (){
+    const response = await execute("SELECT * FROM deliveries",[]);
+    return response.map(v => new Delivery(
+        v.iddeliveries,
+        v.packages_idpackages,
+        v.priority,
+        v.payment_idpayment,
+        v.international,
+        v.start_location,
+        v.end_location,
+        v.message,
+        v.estimated_date,
+        v.start_date,
+        v.end_date,
+        v.uid));
     }
     /**
      * The function get a 1 delivery from the database with the provided id 
      * 
      * @param {Number} id - provide an id with which to query the database
      */
-    static async getDelivery(id = Number) {
-        console.log("type of id in Delivery:", typeof id);
-        const response = await execute("SELECT * FROM deliveries WHERE iddeliveries=?", [`${id}`])
-        return Object.assign(new Delivery(), response[0])
+    static async getDelivery(id=Number) {
+        const response= await execute("SELECT * FROM deliveries WHERE iddeliveries=?",[`${id}`]) 
+        return new Delivery(
+            response[0].iddeliveries,
+            response[0].packages_idpackages,
+            response[0].priority,
+            response[0].payment_idpayment,
+            response[0].international,
+            response[0].start_location,
+            response[0].end_location,
+            response[0].message,
+            response[0].estimated_date,
+            response[0].start_date,
+            response[0].end_date,
+            response[0].uid)
     }
     /**
      *  Compares the new Delivery to the existing one and if there are changes updates the database with the new delivery.
      * @param {Delivery} newDelivery provide the new delivery with which to update the database
      * @returns the updated delivery objecct
      */
-    static async updateDeliveries(newDelivery = new Delivery) {
-        const getUpdatedDelivery = await execute("SELECT * FROM deliveries WHERE uid=?", [`${newDelivery.getUID()}`])
-        if (newDelivery.equals(getUpdatedDelivery[0])) {
+    static async updateDeliveries (newDelivery=  Delivery) {
+        const getUpdatedDelivery = await execute("SELECT * FROM deliveries WHERE uid=?",[`${newDelivery.getUID()}`])
+        if (!newDelivery.equals(getUpdatedDelivery[0])) {
             const response = await execute(
                 "UPDATE deliveries"
-                + "SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?"
-                , [`${newDelivery.getPackageId()}`
-                    , `${newDelivery.getPriority()}`,
+                +" SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?"
+                ,[`${newDelivery.getPackageId()}`
+                ,`${newDelivery.getPriority()}`,
                 `${newDelivery.getPaymentId()}`,
                 `${newDelivery.getInternational()}`,
                 `${newDelivery.getStartLocation()}`,
@@ -150,7 +171,22 @@ class Delivery {
                 `${newDelivery.getEndDate()}`,
                 `${newDelivery.getUID()}`,
                 `${newDelivery.getIdDeliveries()}`])
-            return Object.assign(new Delivery(), getUpdatedDelivery[0])
+            return new Delivery(
+                getUpdatedDelivery[0].iddeliveries,
+                getUpdatedDelivery[0].packages_idpackages,
+                getUpdatedDelivery[0].priority,
+                getUpdatedDelivery[0].payment_idpayment,
+                getUpdatedDelivery[0].international,
+                getUpdatedDelivery[0].start_location,
+                getUpdatedDelivery[0].end_location,
+                getUpdatedDelivery[0].message,
+                getUpdatedDelivery[0].estimated_date,
+                getUpdatedDelivery[0].start_date,
+                getUpdatedDelivery[0].end_date,
+                getUpdatedDelivery[0].uid)
+
+        }else{
+            return "Delivery was not updated, because the delivery info is the same"
         }
 
     }
@@ -159,18 +195,30 @@ class Delivery {
      * @param {number} id provide the id with which to delete a delivery from the database with
      * @returns the deleted delivery item and if it was successful
      */
-    static async deleteDeliveries(id = Number) {
-        const getDeletedDelivery = await execute("SELECT from deliveries Where iddeliveries=?", [`${id}`]);
-        const response = await execute("DELETE from deliveries Where iddeliveries=", [`${id}`]);
-        return Object.assign(new Delivery(), getDeletedDelivery[0])
+    static async deleteDeliveries  (id=Number) {
+        const getDeletedDelivery = await execute("SELECT from deliveries Where iddeliveries=?",[`${id}`]);
+        const response = await execute("DELETE from deliveries Where iddeliveries=",[`${id}`]);
+        return new Delivery(
+            getDeletedDelivery[0].iddeliveries,
+            getDeletedDelivery[0].packages_idpackages,
+            getDeletedDelivery[0].priority,
+            getDeletedDelivery[0].payment_idpayment,
+            getDeletedDelivery[0].international,
+            getDeletedDelivery[0].start_location,
+            getDeletedDelivery[0].end_location,
+            getDeletedDelivery[0].message,
+            getDeletedDelivery[0].estimated_date,
+            getDeletedDelivery[0].start_date,
+            getDeletedDelivery[0].end_date,
+            getDeletedDelivery[0].uid)
     }
     /**
      * Creates a new Delivery entry in the database
      * @param {Delivery} newDelivery Provide the new delivery to create in the database 
      * @returns  Return the newly created delivery
      */
-    static async createDelivery(
-        newDelivery = new Delivery
+    static async createDeliveries (
+        newDelivery=  Delivery
     ) {
         const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
             + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
@@ -199,6 +247,10 @@ class Delivery {
         //     changedRows: 0
         //   }
         // values can be accessed through response.insertId
+    }
+    static async generateUUID(){
+
+        return "DASDA-SDA";
     }
 }
 module.exports = {

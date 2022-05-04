@@ -54,40 +54,57 @@ class Location {
      * Gets an array, every item in the array is an instance of Location class
      * 
      */
-    static async getAllLocations() {
-        const response = await execute("SELECT * FROM Location", []);
-        return response.map(v => Object.assign(new Location(), v));
+    static async getAllLocations (){
+    const response = await execute("SELECT * FROM Location",[]);
+    return response.map(v => new Location(
+        v.idlocation,
+        v.typeoflocation_idtypeoflocation,
+        v.address,
+        v.zip_city_zipcode_idzipcode,
+        v.zip_city_city_idcity));
     }
     /**
      * The function get a 1 Location from the database with the provided id 
      * 
      * @param {Number} id - provide an id with which to query the database
      */
-    static async getLocation(id = Number) {
-
-        const response = await execute("SELECT * FROM Location WHERE idlocation=?", [`${id}`])
-
-        return Object.assign(new Location(), response[0])
-
+    static async getLocation(id=Number) {
+        
+        const response= await execute("SELECT * FROM Location WHERE idlocation=?",[`${id}`])
+        
+        return new Location(
+            response[0].idlocation,
+            response[0].typeoflocation_idtypeoflocation,
+            response[0].address,
+            response[0].zip_city_zipcode_idzipcode,
+            response[0].zip_city_city_idcity)
+    
     }
     /**
      * 
      * @returns 
      */
-    static async updateLocation(
-        newLocation = new Location
+    static async updateLocation (
+        newLocation=  Location
     ) {
-        const getUpdatedLocation = await execute("SELECT * FROM Location WHERE idlocation=?", [`${newLocation.getUID()}`])
-        if (newLocation.equals(getUpdatedLocation[0])) {
+        const getUpdatedLocation = await execute("SELECT * FROM Location WHERE idlocation=?",[`${newLocation.getUID()}`])
+        if (!newLocation.equals(getUpdatedLocation[0])) {
             const response = await execute(
                 "UPDATE Location"
-                + "SET(typeoflocation_idtypeoflocation=?,address=?,zip_city_zipcode_idzipcode=?,zip_city_city_idcity=?) WHERE idlocation=?"
-                , [`${newLocation.getTypeOfLocation()}`
-                    , `${newLocation.getAddress()}`,
+                +" SET typeoflocation_idtypeoflocation=?,address=?,zip_city_zipcode_idzipcode=?,zip_city_city_idcity=? WHERE idlocation=?"
+                ,[`${newLocation.getTypeOfLocation()}`
+                ,`${newLocation.getAddress()}`,
                 `${newLocation.getZipCode()}`,
                 `${newLocation.getCity()}`,
                 `${newLocation.getIdLocation}`])
-            return Object.assign(new Location(), getUpdatedLocation[0])
+            return new Location(
+                getUpdatedLocation[0].idlocation,
+                getUpdatedLocation[0].typeoflocation_idtypeoflocation,
+                getUpdatedLocation[0].address,
+                getUpdatedLocation[0].zip_city_zipcode_idzipcode,
+                getUpdatedLocation[0].zip_city_city_idcity)
+        }{
+            return "Location was not updated, because the location info is the same "
         }
 
     }
@@ -96,18 +113,23 @@ class Location {
      * @param {number} id provide the id with which to delete a Location from the database with
      * @returns the deleted Location item and if it was successful
      */
-    static async deleteLocation(id = Number) {
-        const getDeletedLocation = await execute("SELECT from Location Where idlocation=", [`${id}`]);
-        const response = await execute("DELETE from Location Where idlocation=", [`${id}`]);
-        return Object.assign(new Location(), getDeletedLocation[0])
+    static async deleteLocation  (id=Number) {
+        const getDeletedLocation = await execute("SELECT from Location Where idlocation=",[`${id}`]);
+        const response = await execute("DELETE from Location Where idlocation=",[`${id}`]);
+        return new Location(
+            getDeletedLocation[0].idlocation,
+            getDeletedLocation[0].typeoflocation_idtypeoflocation,
+            getDeletedLocation[0].address,
+            getDeletedLocation[0].zip_city_zipcode_idzipcode,
+            getDeletedLocation[0].zip_city_city_idcity)
     }
-    /**
-      * Creates a new Location entry in the database
-      * @param {Location} newLocation Provide the new Location to create in the database 
-      * @returns  Return the newly created Location
-      */
-    static async createLocation(
-        newLocation = new Location
+   /**
+     * Creates a new Location entry in the database
+     * @param {Location} newLocation Provide the new Location to create in the database 
+     * @returns  Return the newly created Location
+     */
+    static async createLocation (
+        newLocation= Location
     ) {
         const response = await execute("INSERT INTO Location (typeoflocation_idtypeoflocation,address,zip_city_zipcode_idzipcode,zip_city_city_idcity)"
             + "VALUES(?,?,?,?)",
