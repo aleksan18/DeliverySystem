@@ -11,10 +11,10 @@ const init = () => {
             connectionLimit: process.env.MY_SQL_DB_CONNECTION_LIMIT
             ? parseInt(process.env.MY_SQL_DB_CONNECTION_LIMIT)
             : 4,
-            host: process.env.MY_SQL_DB_HOST,
-            user: process.env.MY_SQL_DB_USER,
-            password: process.env.MY_SQL_DB_PASSWORD,
-            database: process.env.MY_SQL_DB_DATABASE
+            host: "localhost",
+            user: "root",
+            password: "aqwcaa9om2",
+            database: "postnord"
         });
         console.debug('MySql Adapter Pool generated successfully');
     } catch (error) {
