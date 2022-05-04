@@ -97,7 +97,7 @@ class Driver {
         if (!newDriver.equals(getUpdatedDriver[0])) {
             const response = await execute(
                 "UPDATE Driver"
-                +"SET(firstname=?,secondname=?,email=?,phone=?,free=?) WHERE idemployees=?"
+                +"SET firstname=?,secondname=?,email=?,phone=?,free=? WHERE idemployees=?"
                 ,[`${newUser.getFirstName()}`
                 ,`${newUser.getSecondName()}`,
                 `${newUser.getEmail()}`,

@@ -145,7 +145,7 @@ class Route {
         if (!newRoute.equals(getUpdatedRoute[0])) {
             const response = await execute(
                 "UPDATE routes"
-                +"SET vehicles_idvehicles=?,employees_idemployees=?,typeofroute_idtypeofroute=?,start_location=?,end_location=?,international=?,deliveries_iddeliveries=?,route_order=?,start_date=?,end_date=? WHERE idroutes=?"
+                +" SET vehicles_idvehicles=?,employees_idemployees=?,typeofroute_idtypeofroute=?,start_location=?,end_location=?,international=?,deliveries_iddeliveries=?,route_order=?,start_date=?,end_date=? WHERE idroutes=?"
                 ,[`${newRoute.getIdVehicle()}`,
                 `${newRoute.getIdEmployees()}`,
                 `${newRoute.getTypeOfRoute()}`,
