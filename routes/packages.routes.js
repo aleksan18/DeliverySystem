@@ -2,6 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const { execute } = require("../database/mysql.connector")
 const { Package } = require("../model/package.model")
+const { check, validationResult } = require("express-validator")
 
 router.post("/addPackage", async (req, res) => {
     // console.log("req.body in /addPackage ", req.body)
