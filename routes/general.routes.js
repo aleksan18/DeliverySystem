@@ -71,6 +71,33 @@ router.post("/updateDriver",[
         }
 
 })
+
+router.delete("deleteDriver/:id",[
+  check("idDriver","Id of driver not provided").exists(),
+],async(req,res)=>{
+  try {
+    const errors =validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
+          message: "Invalid data while deleting a Vehicle",
+        });
+     }
+     
+     var {id} = req.body
+     const response = await Driver.deleteDriver(id)
+     return res.status(200).json({response})
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+    message: "Invalid data",
+    errors: [
+        { value: error, msg: error.message },
+    ],
+});
+}
+})
+
 router.post("/createVehicle",
     [
     check("typeOfVehicle","Type of Vehicle not provided").exists(),
