@@ -1,6 +1,5 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
-// const {checker} = require("../utility/argumentChecker");
 
 class Vehicle {
     #idvehicles;
@@ -53,45 +52,45 @@ class Vehicle {
      * Gets an array, every item in the array is an instance of Vehicle class
      * 
      */
-    static async getAllVehicles (){
-    const response = await execute("SELECT * FROM vehicles",[]);
-    return response.map(v => new Vehicle(v.idvehicles,
-        v.type_of_vehicles_idtype_of_vehicles,
-        v.identifier,
-        v.storage_size,
-        v.free));
+    static async getAllVehicles() {
+        const response = await execute("SELECT * FROM vehicles", []);
+        return response.map(v => new Vehicle(v.idvehicles,
+            v.type_of_vehicles_idtype_of_vehicles,
+            v.identifier,
+            v.storage_size,
+            v.free));
     }
     /**
      * The function get a 1 delivery from the database with the provided id 
      * 
      * @param {Number} id - provide an id with which to query the database
      */
-    static async getVehicle(id=Number) {
-        
-        const response= await execute("SELECT * FROM vehicles WHERE idvehicles=?",[`${id}`])
-        
-        return new Vehicle(response[0].idvehicles,response[0].type_of_vehicles_idtype_of_vehicles,response[0].identifier,response[0].storage_size,response[0].free)
-    
+    static async getVehicle(id = Number) {
+
+        const response = await execute("SELECT * FROM vehicles WHERE idvehicles=?", [`${id}`])
+
+        return new Vehicle(response[0].idvehicles, response[0].type_of_vehicles_idtype_of_vehicles, response[0].identifier, response[0].storage_size, response[0].free)
+
     }
     /**
      * 
      * @returns 
      */
-    static async updateVehicle (
-        newVehicle= Vehicle
+    static async updateVehicle(
+        newVehicle = Vehicle
     ) {
-        const getUpdatedVehicle = await execute("SELECT * FROM vehicles WHERE idvehicles=?",[`${newVehicle.getIdVehicles()}`])
+        const getUpdatedVehicle = await execute("SELECT * FROM vehicles WHERE idvehicles=?", [`${newVehicle.getIdVehicles()}`])
         if (!newVehicle.equals(getUpdatedVehicle[0])) {
             const response = await execute(
                 "UPDATE vehicles"
-                +" SET type_of_vehicles_idtype_of_vehicles=?,identifier=?,storage_size=?,free=? WHERE idvehicles=?"
-                ,[`${newVehicle.getTypeOfVehicle()}`
-                ,`${newVehicle.getIdentifier()}`,
+                + " SET type_of_vehicles_idtype_of_vehicles=?,identifier=?,storage_size=?,free=? WHERE idvehicles=?"
+                , [`${newVehicle.getTypeOfVehicle()}`
+                    , `${newVehicle.getIdentifier()}`,
                 `${newVehicle.getStorageSize()}`,
                 `${newVehicle.getFree()}`,
                 `${newVehicle.getIdVehicles()}`])
-            return new Vehicle(getUpdatedVehicle[0].idvehicles,getUpdatedVehicle[0].type_of_vehicles_idtype_of_vehicles,getUpdatedVehicle[0].identifier,getUpdatedVehicle[0].storage_size,getUpdatedVehicle[0].free,)
-        }else{
+            return new Vehicle(getUpdatedVehicle[0].idvehicles, getUpdatedVehicle[0].type_of_vehicles_idtype_of_vehicles, getUpdatedVehicle[0].identifier, getUpdatedVehicle[0].storage_size, getUpdatedVehicle[0].free,)
+        } else {
             return "Vehicle was not updated, because the vehicle info is the same"
         }
 
@@ -101,9 +100,9 @@ class Vehicle {
      * @param {number} id provide the id with which to delete a Vehicle from the database with
      * @returns the deleted Vehicle item and if it was successful
      */
-    static async deleteVehicle  (id=Number) {
-        const getDeletedDelivery = await execute("SELECT from vehicles Where idvehicles=",[`${id}`]);
-        const response = await execute("DELETE from vehicles Where idvehicles=",[`${id}`]);
+    static async deleteVehicle(id = Number) {
+        const getDeletedDelivery = await execute("SELECT from vehicles Where idvehicles=", [`${id}`]);
+        const response = await execute("DELETE from vehicles Where idvehicles=", [`${id}`]);
         return new Vehicle(
             getDeletedDelivery[0].idvehicles,
             getDeletedDelivery[0].type_of_vehicles_idtype_of_vehicles,

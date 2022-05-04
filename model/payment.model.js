@@ -1,6 +1,5 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
-// const {checker} = require("../utility/argumentChecker");
 
 class Payment {
     #idpayment;
@@ -35,8 +34,8 @@ class Payment {
     /**
     * Getters and Setters for the private fields
     */
-    getIdPayments() { return this.#idpayment }
-    setIdPayments(value) { this.#idpayment = value; }
+    getIdPayment() { return this.#idpayment }
+    setIdPayment(value) { this.#idpayment = value; }
 
     getTpeOfPaymentId() { return this.#typeofpayment_idtypeofpayment }
     setTpeOfPaymentId(value) { this.#typeofpayment_idtypeofpayment = value }
@@ -57,7 +56,7 @@ class Payment {
     setBillingAddress(value) { this.#billing_address = value }
 
     equals(receivedPayment = new Payment) {
-        return receivedPayment.getIdPayments === this.#idpayment &&
+        return receivedPayment.getIdPayment === this.#idpayment &&
             receivedPayment.getTpeOfPaymentId === this.#typeofpayment_idtypeofpayment &&
             receivedPayment.getTransactionid === this.#transactionid &&
             receivedPayment.getPayed === this.#payed &&
@@ -103,7 +102,7 @@ class Payment {
     static async updatePayment(
         newPayment = new Payment
     ) {
-        const getUpdatedPayment = await execute("SELECT * FROM payment WHERE idpayment=?", [`${newPayment.getIdPayments()}`])
+        const getUpdatedPayment = await execute("SELECT * FROM payment WHERE idpayment=?", [`${newPayment.getIdPayment()}`])
         if (newPayment.equals(getUpdatedPayment[0])) {
             const response = await execute(
                 "UPDATE payment"
@@ -114,7 +113,7 @@ class Payment {
                 `${newPayment.getPrepaid()}`,
                 `${newPayment.getTransactionid()}`,
                 `${newPayment.getBillingAddress()}`,
-                `${newPayment.getIdPayments}`,])
+                `${newPayment.getIdPayment}`,])
             return Object.assign(new Payment(), getUpdatedPayment[0])
         }
 

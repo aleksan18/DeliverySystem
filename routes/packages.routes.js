@@ -18,7 +18,8 @@ router.post("/addPackage", async (req, res) => {
         receiver_iduser,
     } = req.body;
     // console.log(await Delivery.updateDeliveries(1,true,1,true,1,1,"","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","D332CD90-8A43"))
-    const newPackage = new Package(idpackages,
+    const newPackage = new Package(
+        idpackages,
         user_iduser,
         weight,
         height,
@@ -44,7 +45,13 @@ router.post("/addPackage", async (req, res) => {
     //   }
     // values can be accessed through response.insertId
     // console.log("response from createDelivery inside /addWholeDelivery", response)
-    return res.json({ response });
+    newPackage.setIdPackage(response.insertId);
+    if (response.affectedRows > 0){
+        return res.status(200).json({ response: { ...req.body, idpackages: newPackage.getIdPackage() } });
+
+    }else{
+        return res.status(500).json({ response: { message: "Internal Server Error" } });
+    }
 })
 
 

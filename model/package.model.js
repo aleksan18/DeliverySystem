@@ -1,6 +1,5 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
-// const {checker} = require("../utility/argumentChecker");
 
 class Package {
     #idpackages;
@@ -41,8 +40,8 @@ class Package {
     /**
     * Getters and Setters for the private fields
     */
-    getIdPackages() { return this.#idpackages }
-    setIdPackages(value) { this.#idpackages = value; }
+    getIdPackage() { return this.#idpackages }
+    setIdPackage(value) { this.#idpackages = value; }
 
     getUserId() { return this.#user_iduser }
     setUserId(value) { this.#user_iduser = value }
@@ -70,9 +69,9 @@ class Package {
 
     getReceiverId() { return this.#receiver_iduser }
     setReceiverId(value) { this.#receiver_iduser = value }
-    
+
     equals(receivedPackage = new Package) {
-        return receivedPackage.getIdPackages === this.#idpackages &&
+        return receivedPackage.getIdPackage === this.#idpackages &&
             receivedPackage.getUserId === this.#user_iduser &&
             receivedPackage.getDepth === this.#depth &&
             receivedPackage.getHeight === this.#height &&
@@ -99,30 +98,30 @@ class Package {
      * Gets an array, every item in the array is an instance of Package class
      * 
      */
-    static async getAllPackages (){
-    const response = await execute("SELECT * FROM Packages",[]);
-    return response.map(v => 
-        new Package(
-        v.idpackages,
-        v.user_iduser,
-        v.weight,
-        v.height,
-        v.width,
-        v.depth,
-        v.fragile,
-        v.electronics,
-        v.oddsized,
-        v.receiver_id));
+    static async getAllPackages() {
+        const response = await execute("SELECT * FROM Packages", []);
+        return response.map(v =>
+            new Package(
+                v.idpackages,
+                v.user_iduser,
+                v.weight,
+                v.height,
+                v.width,
+                v.depth,
+                v.fragile,
+                v.electronics,
+                v.oddsized,
+                v.receiver_id));
     }
     /**
      * The function get a 1 Package from the database with the provided id 
      * 
      * @param {Number} id - provide an id with which to query the database
      */
-    static async getPackage(id=Number) {
-        
-        const response= await execute("SELECT * FROM Packages WHERE idpackages=?",[`${id}`])
-        
+    static async getPackage(id = Number) {
+
+        const response = await execute("SELECT * FROM Packages WHERE idpackages=?", [`${id}`])
+
         return new Package(
             response[0].idpackages,
             response[0].user_iduser,
@@ -134,22 +133,22 @@ class Package {
             response[0].electronics,
             response[0].oddsized,
             response[0].receiver_id)
-    
+
     }
     /**
      * 
      * @returns 
      */
-    static async updatePackage (
-        newPackage= Package
+    static async updatePackage(
+        newPackage = Package
     ) {
-        const getUpdatedPackage = await execute("SELECT * FROM Packages WHERE idpackages=?",[`${newPackage.getIdPackages()}`])
+        const getUpdatedPackage = await execute("SELECT * FROM Packages WHERE idpackages=?", [`${newPackage.getIdPackage()}`])
         if (!newPackage.equals(getUpdatedPackage[0])) {
             const response = await execute(
                 "UPDATE Packages"
-                +" SET user_iduser=?,weight=?,height=?,width=?,depth=?,fragile=?,electronics=?,oddsized=?,receiver_iduser=? WHERE idpackages=?"
-                ,[`${newPackage.getUserId()}`
-                ,`${newPackage.getWeight()}`,
+                + " SET user_iduser=?,weight=?,height=?,width=?,depth=?,fragile=?,electronics=?,oddsized=?,receiver_iduser=? WHERE idpackages=?"
+                , [`${newPackage.getUserId()}`
+                    , `${newPackage.getWeight()}`,
                 `${newPackage.getHeight()}`,
                 `${newPackage.getWidth()}`,
                 `${newPackage.getDepth()}`,
@@ -157,7 +156,7 @@ class Package {
                 `${newPackage.getElectronics()}`,
                 `${newPackage.getOddSized()}`,
                 `${newPackage.getReceiverId()}`,
-                `${newPackage.getIdPackages}`,])
+                `${newPackage.getIdPackage}`,])
             return new Package(
                 getUpdatedPackage[0].idpackages,
                 getUpdatedPackage[0].user_iduser,
@@ -169,7 +168,7 @@ class Package {
                 getUpdatedPackage[0].electronics,
                 getUpdatedPackage[0].oddsized,
                 getUpdatedPackage[0].receiver_id)
-        }else{
+        } else {
             return "Package was not updated, because the package info is the same"
         }
 
@@ -179,9 +178,9 @@ class Package {
      * @param {number} id provide the id with which to delete a Package from the database with
      * @returns the deleted Package item and if it was successful
      */
-    static async deletePackage  (id=Number) {
-        const getDeletedPackage = await execute("SELECT from Packages Where idpackages=",[`${id}`]);
-        const response = await execute("DELETE from Packages Where idpackages=",[`${id}`]);
+    static async deletePackage(id = Number) {
+        const getDeletedPackage = await execute("SELECT from Packages Where idpackages=", [`${id}`]);
+        const response = await execute("DELETE from Packages Where idpackages=", [`${id}`]);
         return new Package(
             getDeletedPackage[0].idpackages,
             getDeletedPackage[0].user_iduser,
@@ -194,13 +193,13 @@ class Package {
             getDeletedPackage[0].oddsized,
             getDeletedPackage[0].receiver_id)
     }
-   /**
-     * Creates a new Package entry in the database
-     * @param {Package} newPackage Provide the new Package to create in the database 
-     * @returns  Return the newly created Package
-     */
-    static async createPackages (
-        newPackage= Package
+    /**
+      * Creates a new Package entry in the database
+      * @param {Package} newPackage Provide the new Package to create in the database 
+      * @returns  Return the newly created Package
+      */
+    static async createPackage(
+        newPackage = Package
     ) {
         const response = await execute("INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
             + "VALUES (?,?,?,?,?,?,?,?,?);",
