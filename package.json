@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/aleksan18/DeliverySystem/issues"
   },
-  "homepage": "https://github.com/aleksan18/DeliverySystem#readme"
+  "homepage": "https://github.com/aleksan18/DeliverySystem#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  }
 }

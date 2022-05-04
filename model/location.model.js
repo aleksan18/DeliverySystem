@@ -91,9 +91,9 @@ class Location {
         if (!newLocation.equals(getUpdatedLocation[0])) {
             const response = await execute(
                 "UPDATE Location"
-                + " SET typeoflocation_idtypeoflocation=?,address=?,zip_city_zipcode_idzipcode=?,zip_city_city_idcity=? WHERE idlocation=?"
-                , [`${newLocation.getTypeOfLocation()}`
-                    , `${newLocation.getAddress()}`,
+                +"SET typeoflocation_idtypeoflocation=?,address=?,zip_city_zipcode_idzipcode=?,zip_city_city_idcity=? WHERE idlocation=?"
+                ,[`${newLocation.getTypeOfLocation()}`
+                ,`${newLocation.getAddress()}`,
                 `${newLocation.getZipCode()}`,
                 `${newLocation.getCity()}`,
                 `${newLocation.getIdLocation}`])

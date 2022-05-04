@@ -6,11 +6,12 @@ const app = express();
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
-app.use("/users", require("./routes/user.routes"));
-app.use("/general", require("./routes/general.routes"));
-app.use("/deliveries", require("./routes/deliveries.routes"));
-app.use("/packages", require("./routes/packages.routes"));
-app.use("/payment", require("./routes/payment.routes"));
+app.use("/users",require("./routes/user.routes"));
+app.use("/general",require("./routes/general.routes"));
+app.use("/deliveries",require("./routes/deliveries.routes"));
+app.use("/packages",require("./routes/packages.routes"));
+app.use("/payment",require("./routes/payment.routes"));
+app.use("/locations",require("./routes/locations.routes"));
 if (process.env.NODE_ENV === "production") {
   app.use("/", express.static(path.join(__dirname, "client", "build")));
 

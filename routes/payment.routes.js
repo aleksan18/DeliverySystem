@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const router = Router();
+const { check, validationResult } = require("express-validator")
 const { execute } = require("../database/mysql.connector")
-const { Payment } = require("../model/payment.model")
 
 router.post("/addPayment", async (req, res) => {
     console.log("req.body in /addPayment ", req.body)
@@ -39,15 +39,40 @@ router.post("/addPayment", async (req, res) => {
     //   }
     // values can be accessed through response.insertId
     newPayment.setIdPayment(response.insertId)
-    if (response.affectedRows > 0){
+    if (response.affectedRows > 0) {
         return res.status(200).json({ response: { ...req.body, idpayment: newPayment.getIdPayment() } });
 
-    }else{
+    } else {
         return res.status(500).json({ response: { message: "Internal Server Error" } });
     }
     // console.log("response from createDelivery inside /addWholeDelivery", response)
 })
 
+router.delete("deletePayment/:id", [
+    check("paymentId", "Paymnet Id not provided").exists(),
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array(),
+                message: "Invalid data while deleting a Vehicle",
+            });
+        }
+
+        var { paymentId } = req.body
+        const response = await Driver.deleteDriver(paymentId)
+        return res.status(200).json({ response })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Invalid data",
+            errors: [
+                { value: error, msg: error.message },
+            ],
+        });
+    }
+})
 
 // router.get("/", async (req, res) => {
 //     const response = await Payment.getAllPayments()
