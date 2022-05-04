@@ -102,7 +102,18 @@ class User {
      */
     static async getAllUsers (){
     const response = await execute("SELECT * FROM user",[]);
-    return response.map(v => Object.assign(new User(), v));
+    return response.map(v => new User(
+        v.idcustomer,
+        v.type_of_user,
+        v.firstname,
+        v.secondname,
+        v.companyname,
+        v.email,
+        v.phone,
+        v.address,
+        v.duns,
+        v.zip_city_zipcode_idzipcode,
+        v.zip_city_city_idcity))
     }
     /**
      * The function get a 1 User from the database with the provided id 
@@ -113,7 +124,17 @@ class User {
         
         const response= await execute("SELECT * FROM user WHERE idcustomer=?",[`${id}`])
         
-        return Object.assign(new User(),response[0])
+        return new User(response[0].idcustomer,
+            response[0].type_of_user,
+            response[0].firstname,
+            response[0].secondname,
+            response[0].companyname,
+            response[0].email,
+            response[0].phone,
+            response[0].address,
+            response[0].duns,
+            response[0].zip_city_zipcode_idzipcode,
+            response[0].zip_city_city_idcity)
     
     }
    /**
@@ -142,7 +163,18 @@ class User {
                 `${newUser.getIdCustomer()}`]);
                 console.log(response);
 
-            return Object.assign(new User(),getUpdatedUser[0])
+            return new User(
+                getUpdatedUser[0].idcustomer,
+                getUpdatedUser[0].type_of_user,
+                getUpdatedUser[0].firstname,
+                getUpdatedUser[0].secondname,
+                getUpdatedUser[0].companyname,
+                getUpdatedUser[0].email,
+                getUpdatedUser[0].phone,
+                getUpdatedUser[0].address,
+                getUpdatedUser[0].duns,
+                getUpdatedUser[0].zip_city_zipcode_idzipcode,
+                getUpdatedUser[0].zip_city_city_idcity)
         }
        else {
            return "User was not updated, because the user info is the same"
@@ -156,7 +188,18 @@ class User {
     static async deleteUser  (id=Number) {
         const getDeletedUser = await execute("SELECT from user Where idcustomer=",[`${id}`]);
         const response = await execute("DELETE from user Where idcustomer=",[`${id}`]);
-        return Object.assign(new User(),getDeletedUser[0])
+        console.log(response);
+        return new User(getDeletedUser[0].idcustomer,
+            getDeletedUser[0].type_of_user,
+            getDeletedUser[0].firstname,
+            getDeletedUser[0].secondname,
+            getDeletedUser[0].companyname,
+            getDeletedUser[0].email,
+            getDeletedUser[0].phone,
+            getDeletedUser[0].address,
+            getDeletedUser[0].duns,
+            getDeletedUser[0].zip_city_zipcode_idzipcode,
+            getDeletedUser[0].zip_city_city_idcity)
     }
      /**
      * Creates a new user entry in the database

@@ -55,7 +55,11 @@ class Vehicle {
      */
     static async getAllVehicles (){
     const response = await execute("SELECT * FROM vehicles",[]);
-    return response.map(v => Object.assign(new Vehicle(), v));
+    return response.map(v => new Vehicle(v.idvehicles,
+        v.type_of_vehicles_idtype_of_vehicles,
+        v.identifier,
+        v.storage_size,
+        v.free));
     }
     /**
      * The function get a 1 delivery from the database with the provided id 
@@ -66,7 +70,7 @@ class Vehicle {
         
         const response= await execute("SELECT * FROM vehicles WHERE idvehicles=?",[`${id}`])
         
-        return Object.assign(new Vehicle(),response[0])
+        return new Vehicle(response[0].idvehicles,response[0].type_of_vehicles_idtype_of_vehicles,response[0].identifier,response[0].storage_size,response[0].free)
     
     }
     /**
@@ -74,10 +78,10 @@ class Vehicle {
      * @returns 
      */
     static async updateVehicle (
-        newVehicle=new Vehicle
+        newVehicle= Vehicle
     ) {
         const getUpdatedVehicle = await execute("SELECT * FROM vehicles WHERE idvehicles=?",[`${newVehicle.getIdVehicles()}`])
-        if (newVehicle.equals(getUpdatedVehicle[0])) {
+        if (!newVehicle.equals(getUpdatedVehicle[0])) {
             const response = await execute(
                 "UPDATE vehicles"
                 +" SET type_of_vehicles_idtype_of_vehicles=?,identifier=?,storage_size=?,free=? WHERE idvehicles=?"
@@ -86,7 +90,9 @@ class Vehicle {
                 `${newVehicle.getStorageSize()}`,
                 `${newVehicle.getFree()}`,
                 `${newVehicle.getIdVehicles()}`])
-            return Object.assign(new Vehicle(),getUpdatedVehicle[0])
+            return new Vehicle(getUpdatedVehicle[0].idvehicles,getUpdatedVehicle[0].type_of_vehicles_idtype_of_vehicles,getUpdatedVehicle[0].identifier,getUpdatedVehicle[0].storage_size,getUpdatedVehicle[0].free,)
+        }else{
+            return "Vehicle was not updated, because the vehicle info is the same"
         }
        
     }
@@ -98,7 +104,12 @@ class Vehicle {
     static async deleteVehicle  (id=Number) {
         const getDeletedDelivery = await execute("SELECT from vehicles Where idvehicles=",[`${id}`]);
         const response = await execute("DELETE from vehicles Where idvehicles=",[`${id}`]);
-        return Object.assign(new Vehicle(),getDeletedDelivery[0])
+        return new Vehicle(
+            getDeletedDelivery[0].idvehicles,
+            getDeletedDelivery[0].type_of_vehicles_idtype_of_vehicles,
+            getDeletedDelivery[0].identifier,
+            getDeletedDelivery[0].storage_size,
+            getDeletedDelivery[0].free)
     }
       /**
      * Creates a new Vehicle entry in the database

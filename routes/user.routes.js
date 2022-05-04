@@ -76,9 +76,13 @@ router.post("/updateUser",[
         }
 
 })
-router.post("/getUser", (req, res)=>{
+router.post("/getUser",async (req, res)=>{
 
-
+  const user = await User.getUser(43);
+  console.log(user);
+  const users = await User.getAllUsers();
+  console.log(users);
+  return res.status(200).json({user});
 })
 
 module.exports = router;
