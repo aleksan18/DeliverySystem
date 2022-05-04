@@ -4,11 +4,12 @@ const {check,validationResult} = require("express-validator")
 
 const {Location} = require("../model/location.model");
 
-router.post("/location",
+router.post("/createLocation",
     [
-    check("typeOfUser","Type of user not provided").exists(),
-    check("firstName","First name not provided").exists(),
-    check("secondName","Second name not provided").exists(),
+    check("typeOfLocationId","Type of lcoation id not provided").exists(),
+    check("address","Address not provided").exists(),
+    check("zipCode","Zipc ode name not provided").exists(),
+    check("cityId","City id not provided").exists(),
     
     ],async(req, res)=>{
     try {
@@ -19,8 +20,8 @@ router.post("/location",
               message: "Invalid data while creating a location",
             });
          }
-         const {} = req.body;
-         const location = new Location();
+         const {typeOfLocationId, address, zipCode, cityId} = req.body;
+         const location = new Location(undefined, typeOfLocationId,address,zipCode,cityId);
          console.log(location)
          const response= await Location.createLocation(location)
         return res.status(200).json({response}) 

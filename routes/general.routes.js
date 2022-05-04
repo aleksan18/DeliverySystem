@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const router = Router();
-const {check,validationResult} = require("express-validator")
+const {check,validationResult} = require("express-validator");
+const req = require("express/lib/request");
 const {execute} = require("../database/mysql.connector")
 const {Driver} = require("../model/driver.model");
 const {Vehicle} = require("../model/vehicle.model")
@@ -131,4 +132,34 @@ router.post("/updateVehicle",[
         }
 
 })
+
+router.delete("deleteVehicle/:id",[
+  check("idVehicle","Id of vehicle not provided").exists(),
+],async(req,res)=>{
+  try {
+    const errors =validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
+          message: "Invalid data while deleting a Vehicle",
+        });
+     }
+     
+     var {id} = req.body
+     const response = await Vehicle.deleteVehicle(id)
+     return res.status(200).json({response})
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+    message: "Invalid data",
+    errors: [
+        { value: error, msg: error.message },
+    ],
+});
+}
+})
+
+
+
+
 module.exports = router;

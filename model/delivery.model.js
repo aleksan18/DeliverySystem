@@ -1,6 +1,6 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const {execute} = require("../database/mysql.connector.js");
-const {checker} = require("../utility/argumentChecker");
+//const {checker} = require("../utility/argumentChecker");
 class Delivery {
     #iddeliveries;
     #packages_idpackages ;
