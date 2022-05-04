@@ -97,7 +97,19 @@ class Route {
      */
     static async getAllRoutes (){
     const response = await execute("SELECT * FROM routes",[]);
-    return response.map(v => Object.assign(new Route(), v));
+    return response.map(v => 
+        new Route(
+        v.idroutes,
+        v.vehicles_idvehicles,
+        v.employees_idemployees,
+        v.typeofroute_idtypeofroute,
+        v.start_location,
+        v.end_location,
+        v.international,
+        v.deliveries_iddeliveries,
+        v.route_order,
+        v.start_date,
+        v.end_date));
     }
     /**
      * The function get a 1 routes from the database with the provided id 
@@ -108,7 +120,18 @@ class Route {
         
         const response= await execute("SELECT * FROM routes WHERE idroutes=?",[`${id}`])
         
-        return Object.assign(new Route(),response[0])
+        return new Route(
+            response[0].idroutes,
+            response[0].vehicles_idvehicles,
+            response[0].employees_idemployees,
+            response[0].typeofroute_idtypeofroute,
+            response[0].start_location,
+            response[0].end_location,
+            response[0].international,
+            response[0].deliveries_iddeliveries,
+            response[0].route_order,
+            response[0].start_date,
+            response[0].end_date)
     
     }
     /**
@@ -116,13 +139,13 @@ class Route {
      * @returns 
      */
     static async updateRoute (
-        newRoute=new Route
+        newRoute= Route
     ) {
         const getUpdatedRoute = await execute("SELECT * FROM routes WHERE idroutes=?",[`${newRoute.getIdRoutes()}`])
-        if (newRoute.equals(getUpdatedRoute[0])) {
+        if (!newRoute.equals(getUpdatedRoute[0])) {
             const response = await execute(
                 "UPDATE routes"
-                +"SET(vehicles_idvehicles=?,employees_idemployees=?,typeofroute_idtypeofroute=?,start_location=?,end_location=?,international=?,deliveries_iddeliveries=?,route_order=?,start_date=?,end_date=?) WHERE idroutes=?"
+                +"SET vehicles_idvehicles=?,employees_idemployees=?,typeofroute_idtypeofroute=?,start_location=?,end_location=?,international=?,deliveries_iddeliveries=?,route_order=?,start_date=?,end_date=? WHERE idroutes=?"
                 ,[`${newRoute.getIdVehicle()}`,
                 `${newRoute.getIdEmployees()}`,
                 `${newRoute.getTypeOfRoute()}`,
@@ -134,7 +157,21 @@ class Route {
                 `${newRoute.getStartDate()}`,
                 `${newRoute.getEndDate()}`,
                 `${newRoute.getIdRoutes}`])
-            return Object.assign(new Route(),getUpdatedRoute[0])
+            console.log(response);
+            return new Route(
+                getUpdatedRoute[0].idroutes,
+                getUpdatedRoute[0].vehicles_idvehicles,
+                getUpdatedRoute[0].employees_idemployees,
+                getUpdatedRoute[0].typeofroute_idtypeofroute,
+                getUpdatedRoute[0].start_location,
+                getUpdatedRoute[0].end_location,
+                getUpdatedRoute[0].international,
+                getUpdatedRoute[0].deliveries_iddeliveries,
+                getUpdatedRoute[0].route_order,
+                getUpdatedRoute[0].start_date,
+                getUpdatedRoute[0].end_date)
+        }else{
+            return "Route was not updated, because the route info is the same"
         }
     }
     /**
@@ -145,7 +182,18 @@ class Route {
     static async deleteRoute  (id=Number) {
         const getDeletedroutes = await execute("SELECT from routes Where idroutes=",[`${id}`]);
         const response = await execute("DELETE from routes Where idroutes=",[`${id}`]);
-        return Object.assign(new Route(),getDeletedroutes[0])
+        return new Route(
+            getDeletedroutes[0].idroutes,
+            getDeletedroutes[0].vehicles_idvehicles,
+            getDeletedroutes[0].employees_idemployees,
+            getDeletedroutes[0].typeofroute_idtypeofroute,
+            getDeletedroutes[0].start_location,
+            getDeletedroutes[0].end_location,
+            getDeletedroutes[0].international,
+            getDeletedroutes[0].deliveries_iddeliveries,
+            getDeletedroutes[0].route_order,
+            getDeletedroutes[0].start_date,
+            getDeletedroutes[0].end_date)
     }
     /**
      * Creates a new Route entry in the database
@@ -153,7 +201,7 @@ class Route {
      * @returns  Return the newly created Route
      */
      static async createRoutes (
-        newRoute=new Route
+        newRoute= Route
     ) {
         const response = await execute("INSERT INTO Routes(vehicles_idvehicles,employees_idemployees,typeofroute_idtypeofroute,start_location,end_location,international,deliveries_iddeliveries,route_order,start_date,end_date)"
         +"VALUES(?,?,?,?,?,?,?,?,?,?)",
@@ -167,6 +215,7 @@ class Route {
         `${newRoute.getRouteOrder()}`
         `${newRoute.getStartDate()}`,
         `${newRoute.getEndDate()}`,])
+        console.log(response);
         return newRoute;
     }
 }
