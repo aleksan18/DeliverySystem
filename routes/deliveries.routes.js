@@ -182,7 +182,7 @@ router.delete("deleteDelivery/:id",[
       if (!errors.isEmpty()) {
           return res.status(400).json({
             errors: errors.array(),
-            message: "Invalid data while deleting a Vehicle",
+            message: "Invalid data while deleting a Delivery",
           });
        }
        
