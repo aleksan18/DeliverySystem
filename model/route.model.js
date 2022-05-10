@@ -86,6 +86,14 @@ class Route {
             route.getStartDate() === this.#start_date &&
             route.getEndDate() === this.#end_date
     }
+
+    toString(){
+        return `idroutes=${this.#idroutes}, vehicles_idvehicles= ${this.vehicles_idvehicles}, ` +
+            `employees_idemployees= ${this.employees_idemployees}, typeofroute_idtypeofroute= ${this.typeofroute_idtypeofroute}, ` +
+            `start_location= ${this.start_location}, end_location= ${this.end_location}, international= ${this.international}, ` +
+            `deliveries_iddeliveries= ${this.deliveries_iddeliveries}, route_order= ${this.route_order}, ` + 
+            `start_date= ${this.start_date}, end_date= ${this.end_date}`
+    }
     /*
     Static functions used to call the database without needing to initialize the class
     they return instance of Route
@@ -96,6 +104,7 @@ class Route {
      */
     static async getAllRoutes() {
         const response = await execute("SELECT * FROM routes", []);
+        console.log("response from Mysql > Routes ", response)
         return response.map(v =>
             new Route(
                 v.idroutes,
@@ -199,7 +208,7 @@ class Route {
      * @param {Route} newRoute Provide the new Route to create in the database 
      * @returns  Return the newly created Route
      */
-    static async createRoutes(
+    static async createRoute(
         newRoute = Route
     ) {
         const response = await execute("INSERT INTO Routes(vehicles_idvehicles,employees_idemployees,typeofroute_idtypeofroute,start_location,end_location,international,deliveries_iddeliveries,route_order,start_date,end_date)"

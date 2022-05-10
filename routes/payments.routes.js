@@ -2,6 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const { check, validationResult } = require("express-validator")
 const { execute } = require("../database/mysql.connector")
+const { Payment } = require("../model/payment.model")
 
 router.post("/addPayment", async (req, res) => {
     console.log("req.body in /addPayment ", req.body)
