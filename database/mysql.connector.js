@@ -38,6 +38,7 @@ const individualQuery = (connection, query,params) => {
   let returnValue;
   connection.query(query,params,(err,results) => {
     if (err) {          //Query Error (Rollback and release connection)
+      console.log(err);
       connection.rollback(function() {
         connection.release();
         //Failure
@@ -45,13 +46,14 @@ const individualQuery = (connection, query,params) => {
     } else {
       connection.commit((err)=> {
         if (err) {
+          console.log(err);
           connection.rollback(() =>{
             connection.release();
             //Failure
         });
         } else {
+          console.log(results);
           returnValue=results;
-          connection.release();
           //Success
         }
       })
@@ -61,7 +63,7 @@ return returnValue;
 }
   /**
    * A function which is used for executing multiple queries within a transaction
-   * @param {String[]} queriesAn Array of mysql queries that will be executed within a transaction. These can contain `?`s
+   * @param {String[]} queries Array of mysql queries that will be executed within a transaction. These can contain `?`s
    *                              which will be replaced with values in `params`.
    * @param {Array[]} params An array of arrays that is the same length as `queries`.
    * Each array in `params` should contain values to replace the `?`s in the corresponding query in `queries`. If a query has no `?`s, an empty array should be provided.
@@ -87,7 +89,15 @@ const executeTransaction = (
     }
     return new Promise((resolve, reject) => { 
       const results=[];
-      pool.getConnection((err,connection)=>{  
+      if (!pool)
+      throw new Error(
+        "Pool was not created. Ensure pool is created when running the app."
+      );
+      pool.getConnection((err,connection)=>{
+        if(err){
+          console.error(err);
+          throw new Error("failed to execute MySQL query");
+        }  
         connection.beginTransaction((error)=>{
           if(error){
             connection.rollback(()=>{
@@ -98,6 +108,7 @@ const executeTransaction = (
             })
           }else{
             queries.forEach((element,index) => {
+              console.log(params[index]);
               results.push(individualQuery(connection, element,params[index]));
             });
             resolve(results);
