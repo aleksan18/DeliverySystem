@@ -1,6 +1,6 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
-
+const {generator} = require("../utility/stringGenerator");
 class Delivery {
     #iddeliveries;
     #packages_idpackages;
@@ -288,9 +288,40 @@ class Delivery {
         //   }
         // values can be accessed through response.insertId
     }
+    /**
+     * Generates a unique string identifier with the format `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+     * The `x` can be a character or number from `[a-z],[A-Z],[0-9]`
+     * @returns Returns a 36 character long semi-unique identifier
+     */
     static async generateUUID() {
-
-        return "DASDA-SDA";
+        let uid = "";
+        while(uid.length < 36){
+        console.log(uid.length)
+        switch (uid.length) {
+            case 8:
+                console.log(uid);
+                uid = uid+"-";
+                console.log(uid);
+                break;
+            case 13:
+                console.log(uid);
+                uid = uid+"-";
+                console.log(uid);
+                break;  
+            case 18:
+                uid = uid+"-";
+                break; 
+            case 23:
+                uid = uid+"-";
+                break;
+            default:
+                console.log(uid);
+                uid = uid+""+generator();
+            case 36:
+                break;
+        }
+    }
+        return uid;
     }
 }
 module.exports = {
