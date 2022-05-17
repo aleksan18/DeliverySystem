@@ -252,8 +252,8 @@ router.post("/transaction",async (req, res)=>{
             });
         }
         const {newUser,newPackage} = req.body;
-        const response = await executeTransaction(["INSERT INTO user (type_of_user,firstname,secondname,companyname,email,phone,address,duns,zip_city_zipcode_idzipcode,zip_city_city_idcity)"
-        + "VALUES(?,?,?,?,?,?,?,?,?,?)","INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
+        const response = await executeTransaction(["INSERT INTO user (type_of_user,firstname,secondname,companyname,email,phone,address,duns,zip_city_zipcode_idzipcode,zip_city_city_idcity,password)"
+        + "VALUES(?,?,?,?,?,?,?,?,?,?,?)","INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
         + "VALUES (LAST_INSERT_ID(),?,?,?,?,?,?,?,?);"],[
             [`${newUser.type_of_user}`,
             `${newUser.firstname}`,
@@ -264,7 +264,8 @@ router.post("/transaction",async (req, res)=>{
             `${newUser.address}`,
             `${newUser.duns}`,
             `${newUser.zip_city_zipcode_idzipcode}`,
-            `${newUser.zip_city_city_idcity}`,],
+            `${newUser.zip_city_city_idcity}`,
+            `${newUser.password}`,],
             [
                 `${newPackage.weight}`,
                 `${newPackage.height}`,

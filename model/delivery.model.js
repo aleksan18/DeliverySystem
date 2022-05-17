@@ -112,20 +112,28 @@ class Delivery {
      * 
      */
     static async getAllDeliveries() {
-        const response = await execute("SELECT * FROM deliveries", []);
-        return response.map(v => new Delivery(
-            v.iddeliveries,
-            v.packages_idpackages,
-            v.priority,
-            v.payment_idpayment,
-            v.international,
-            v.start_location,
-            v.end_location,
-            v.message,
-            v.estimated_date,
-            v.start_date,
-            v.end_date,
-            v.uid));
+        try {
+            const response = await execute("SELECT * FROM deliveries", []);
+            return response.map(v => new Delivery(
+                v.iddeliveries,
+                v.packages_idpackages,
+                v.priority,
+                v.payment_idpayment,
+                v.international,
+                v.start_location,
+                v.end_location,
+                v.message,
+                v.estimated_date,
+                v.start_date,
+                v.end_date,
+                v.uid));    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+     
     }
     /**
      * The function get a 1 delivery from the database with the provided id 
@@ -133,20 +141,28 @@ class Delivery {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getDelivery(id = Number) {
-        const response = await execute("SELECT * FROM deliveries WHERE iddeliveries=?", [`${id}`])
-        return new Delivery(
-            response[0].iddeliveries,
-            response[0].packages_idpackages,
-            response[0].priority,
-            response[0].payment_idpayment,
-            response[0].international,
-            response[0].start_location,
-            response[0].end_location,
-            response[0].message,
-            response[0].estimated_date,
-            response[0].start_date,
-            response[0].end_date,
-            response[0].uid)
+        try {
+            const response = await execute("SELECT * FROM deliveries WHERE iddeliveries=?", [`${id}`])
+            return new Delivery(
+                response[0].iddeliveries,
+                response[0].packages_idpackages,
+                response[0].priority,
+                response[0].payment_idpayment,
+                response[0].international,
+                response[0].start_location,
+                response[0].end_location,
+                response[0].message,
+                response[0].estimated_date,
+                response[0].start_date,
+                response[0].end_date,
+                response[0].uid)    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+       
     }
     /**
      *  Compares the new Delivery to the existing one and if there are changes updates the database with the new delivery.
@@ -154,40 +170,48 @@ class Delivery {
      * @returns the updated delivery objecct
      */
     static async updateDelivery(newDelivery = Delivery) {
-        const getUpdatedDelivery = await execute("SELECT * FROM deliveries WHERE uid=?", [`${newDelivery.getUID()}`])
-        if (!newDelivery.equals(getUpdatedDelivery[0])) {
-            const response = await execute(
-                "UPDATE deliveries"
-                + " SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?"
-                , [`${newDelivery.getPackageId()}`
-                    , `${newDelivery.getPriority()}`,
-                `${newDelivery.getPaymentId()}`,
-                `${newDelivery.getInternational()}`,
-                `${newDelivery.getStartLocation()}`,
-                `${newDelivery.getEndLocation()}`,
-                `${newDelivery.getMessage()}`,
-                `${newDelivery.getEstimatedDate()}`,
-                `${newDelivery.getStartDate()}`,
-                `${newDelivery.getEndDate()}`,
-                `${newDelivery.getUID()}`,
-                `${newDelivery.getIdDeliveries()}`])
-            return new Delivery(
-                getUpdatedDelivery[0].iddeliveries,
-                getUpdatedDelivery[0].packages_idpackages,
-                getUpdatedDelivery[0].priority,
-                getUpdatedDelivery[0].payment_idpayment,
-                getUpdatedDelivery[0].international,
-                getUpdatedDelivery[0].start_location,
-                getUpdatedDelivery[0].end_location,
-                getUpdatedDelivery[0].message,
-                getUpdatedDelivery[0].estimated_date,
-                getUpdatedDelivery[0].start_date,
-                getUpdatedDelivery[0].end_date,
-                getUpdatedDelivery[0].uid)
-
-        } else {
-            return "Delivery was not updated, because the delivery info is the same"
+        try {
+            const getUpdatedDelivery = await execute("SELECT * FROM deliveries WHERE uid=?", [`${newDelivery.getUID()}`])
+            if (!newDelivery.equals(getUpdatedDelivery[0])) {
+                const response = await execute(
+                    "UPDATE deliveries"
+                    + " SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?"
+                    , [`${newDelivery.getPackageId()}`
+                        , `${newDelivery.getPriority()}`,
+                    `${newDelivery.getPaymentId()}`,
+                    `${newDelivery.getInternational()}`,
+                    `${newDelivery.getStartLocation()}`,
+                    `${newDelivery.getEndLocation()}`,
+                    `${newDelivery.getMessage()}`,
+                    `${newDelivery.getEstimatedDate()}`,
+                    `${newDelivery.getStartDate()}`,
+                    `${newDelivery.getEndDate()}`,
+                    `${newDelivery.getUID()}`,
+                    `${newDelivery.getIdDeliveries()}`])
+                return new Delivery(
+                    getUpdatedDelivery[0].iddeliveries,
+                    getUpdatedDelivery[0].packages_idpackages,
+                    getUpdatedDelivery[0].priority,
+                    getUpdatedDelivery[0].payment_idpayment,
+                    getUpdatedDelivery[0].international,
+                    getUpdatedDelivery[0].start_location,
+                    getUpdatedDelivery[0].end_location,
+                    getUpdatedDelivery[0].message,
+                    getUpdatedDelivery[0].estimated_date,
+                    getUpdatedDelivery[0].start_date,
+                    getUpdatedDelivery[0].end_date,
+                    getUpdatedDelivery[0].uid)
+    
+            } else {
+                return "Delivery was not updated, because the delivery info is the same"
+            }    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }     
         }
+        
 
     }
     /**
@@ -196,21 +220,29 @@ class Delivery {
      * @returns the deleted delivery item and if it was successful
      */
     static async deleteDelivery(id = Number) {
-        const getDeletedDelivery = await execute("SELECT from deliveries Where iddeliveries=?", [`${id}`]);
-        const response = await execute("DELETE from deliveries Where iddeliveries=", [`${id}`]);
-        return new Delivery(
-            getDeletedDelivery[0].iddeliveries,
-            getDeletedDelivery[0].packages_idpackages,
-            getDeletedDelivery[0].priority,
-            getDeletedDelivery[0].payment_idpayment,
-            getDeletedDelivery[0].international,
-            getDeletedDelivery[0].start_location,
-            getDeletedDelivery[0].end_location,
-            getDeletedDelivery[0].message,
-            getDeletedDelivery[0].estimated_date,
-            getDeletedDelivery[0].start_date,
-            getDeletedDelivery[0].end_date,
-            getDeletedDelivery[0].uid)
+        try {
+            const getDeletedDelivery = await execute("SELECT from deliveries Where iddeliveries=?", [`${id}`]);
+            const response = await execute("DELETE from deliveries Where iddeliveries=", [`${id}`]);
+            return new Delivery(
+                getDeletedDelivery[0].iddeliveries,
+                getDeletedDelivery[0].packages_idpackages,
+                getDeletedDelivery[0].priority,
+                getDeletedDelivery[0].payment_idpayment,
+                getDeletedDelivery[0].international,
+                getDeletedDelivery[0].start_location,
+                getDeletedDelivery[0].end_location,
+                getDeletedDelivery[0].message,
+                getDeletedDelivery[0].estimated_date,
+                getDeletedDelivery[0].start_date,
+                getDeletedDelivery[0].end_date,
+                getDeletedDelivery[0].uid)    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }    
+        }
+        
     }
     /**
      * Creates a new Delivery entry in the database
@@ -220,7 +252,8 @@ class Delivery {
     static async createDelivery(
         newDelivery = Delivery
     ) {
-        const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
+        try {
+            const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
             + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
             [newDelivery.getPackageId(),
             newDelivery.getPriority(),
@@ -234,7 +267,14 @@ class Delivery {
             newDelivery.getEndDate(),
             newDelivery.getUID()])
         console.log("createDelivery response: ", response)
-        return response;
+        return response;    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
         // example of what createDelivery() should return 
         // OkPacket {
         //     fieldCount: 0,
