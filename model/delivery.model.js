@@ -177,7 +177,7 @@ class Delivery {
                     "UPDATE deliveries"
                     + " SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?"
                     , [`${newDelivery.getPackageId()}`
-                        , `${newDelivery.getPriority()}`,
+                    , `${newDelivery.getPriority()}`,
                     `${newDelivery.getPaymentId()}`,
                     `${newDelivery.getInternational()}`,
                     `${newDelivery.getStartLocation()}`,
@@ -265,7 +265,7 @@ class Delivery {
             newDelivery.getEstimatedDate(),
             newDelivery.getStartDate(),
             newDelivery.getEndDate(),
-            newDelivery.getUID()])
+            generateUUID()])
         console.log("createDelivery response: ", response)
         return response;    
         } catch (error) {
@@ -293,7 +293,7 @@ class Delivery {
      * The `x` can be a character or number from `[a-z],[A-Z],[0-9]`
      * @returns Returns a 36 character long semi-unique identifier
      */
-    static async generateUUID() {
+     generateUUID() {
         let uid = "";
         while(uid.length < 36){
         console.log(uid.length)

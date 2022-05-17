@@ -121,7 +121,7 @@ class User {
                 v.duns,
                 v.zip_city_zipcode_idzipcode,
                 v.zip_city_city_idcity,
-                v.password))
+                v.password))    
         } catch (error) {
             console.log("[mysql.connector][execute][Error]: ", error);
             throw { value:"Query failed", 
