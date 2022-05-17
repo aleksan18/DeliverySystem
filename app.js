@@ -1,8 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
+
 const { init } = require("./database/mysql.connector");
 const app = express();
+const {startMongo} = require("./mongo/database/mongo.connection")
 app.use(express.json({ limit: "30mb", extended: true }));
 app.use(express.urlencoded({ limit: "30mb", extended: true }));
 
@@ -27,6 +29,7 @@ async function start() {
     app.listen(PORT, () => console.log(`App has been started on port ${PORT}...`)
     );
     init();
+    startMongo()
   } catch (e) {
     process.exit(1);
   }
