@@ -1,6 +1,6 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
-const {generator} = require("../utility/stringGenerator");
+const {characterGenerator} = require("../utility/utility.generators");
 class Delivery {
     #iddeliveries;
     #packages_idpackages;
@@ -316,7 +316,7 @@ class Delivery {
                 break;
             default:
                 console.log(uid);
-                uid = uid+""+generator();
+                uid = uid+""+characterGenerator(4);
             case 36:
                 break;
         }

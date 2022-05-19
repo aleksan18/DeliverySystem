@@ -1,5 +1,6 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
+const { characterGenerator, numberGenerator,transactionDateGenerator } = require("../utility/utility.generators.js");
 
 class Payment {
     #idpayment;
@@ -201,7 +202,7 @@ class Payment {
             newPayment.getAmount(),
             newPayment.getPayed(),
             newPayment.getPrepaid(),
-            newPayment.getTransactionid(),
+            generateTransactionId(),
             newPayment.getBillingAddress()])
         console.log("createPayment response: ", response)
         return response;
@@ -212,6 +213,16 @@ class Payment {
             } 
         }
        
+    }
+    /**
+     * Generates a unique string id with the  format `xxxxxxxxNNNNN - ddmmyy`
+     *  The `x` represents a character or number from `[a-z],[A-Z],[0-9]` that has been generated randomly.
+     * The `N` represents a number from `[0-9]` that has been generated randomly.
+     * The `ddmmyy` is based on the current date. `yy` is the last two numbers of the year.
+     * @returns Returns a 20 character long semi-unique identifier.
+     */
+    generateTransactionId(){
+        return characterGenerator(8)+numberGenerator(5)+"-"+transactionDateGenerator()
     }
 }
 module.exports = {
