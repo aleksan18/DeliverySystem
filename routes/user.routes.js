@@ -25,10 +25,15 @@ router.post("/createUser",
                 });
             }
             const { typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city } = req.body;
-            const user = new User(undefined, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city);
+            const user = new User(null, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city);
             console.log(user)
-            const response = await User.createUser(user)
-            return res.status(200).json({ response })
+            const { userCreated, createdUser }   = await User.createUser(user)
+            if (userCreated) {
+                return res.status(200).json({ response: { createdUser } });
+        
+            } else {
+                return res.status(500).json({ response: { message: "Internal Server Error" } });
+            }
         } catch (error) {
             console.log(error);
             return res.status(500).json({
@@ -63,8 +68,14 @@ router.post("/updateUser", [
         const { idCustomer, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city } = req.body;
         const user = new User(idCustomer, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city);
         console.log(user);
-        const response = await User.updateUser(user)
-        return res.status(200).json({ response })
+        const { userInfoIsSame, updatedUser } = await User.updateUser(user)
+        if (!userInfoIsSame && typeof updatedUser === 'object') {
+            return res.status(200).json({ response: updatedUser });
+        } else if (!userInfoIsSame && updatedUser === undefined) {
+            return res.status(500).json({ response: { message: "Internal Server Error" } });
+        } else if (userInfoIsSame) {
+            return res.status(400).json({ response: updatedUser, message: "User was not updated, because the user info is the same" });
+        }
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -84,34 +95,40 @@ router.post("/getUser", async (req, res) => {
     console.log(users);
     return res.status(200).json({ user });
 })
+router.get("/getUsers", async (req, res) => {
 
-router.delete("/deleteUser",[
-  check("Id","User id not provided").exists(),
-], 
-async(req, res)=>{
-  try {
-      const errors =validationResult(req);
-      if (!errors.isEmpty()) {
-          return res.status(400).json({
-            errors: errors.array(),
-            message: "Invalid data while deleting a user",
-          });
-       }
-       
-       var {id} = req.body
-       const response = await User.deleteUser(id)
-       return res.status(200).json({response})
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-      message: "Invalid data",
-      errors: [
-          { value: error, msg: error.message },
-      ],
-  });
-  }
-
+    const users = await User.getAllUsers();
+    console.log(users);
+    return res.status(200).json({ users });
 })
+
+// router.delete("/deleteUser",[
+//   check("Id","User id not provided").exists(),
+// ], 
+// async(req, res)=>{
+//   try {
+//       const errors =validationResult(req);
+//       if (!errors.isEmpty()) {
+//           return res.status(400).json({
+//             errors: errors.array(),
+//             message: "Invalid data while deleting a user",
+//           });
+//        }
+       
+//        var {id} = req.body
+//        const response = await User.deleteUser(id)
+//        return res.status(200).json({response})
+//     } catch (error) {
+//       console.log(error);
+//       return res.status(500).json({
+//       message: "Invalid data",
+//       errors: [
+//           { value: error, msg: error.message },
+//       ],
+//   });
+//   }
+
+// })
 
 module.exports = router;
 
