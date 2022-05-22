@@ -219,7 +219,7 @@ class Payment {
      *  The `x` represents a character or number from `[a-z],[A-Z],[0-9]` that has been generated randomly.
      * The `N` represents a number from `[0-9]` that has been generated randomly.
      * The `ddmmyy` is based on the current date. `yy` is the last two numbers of the year.
-     * @returns Returns a 20 character long semi-unique identifier.
+     * @returns {String}  Returns a 20 character long semi-unique identifier.
      */
     generateTransactionId(){
         return characterGenerator(8)+numberGenerator(5)+"-"+transactionDateGenerator()

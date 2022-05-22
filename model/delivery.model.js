@@ -291,7 +291,7 @@ class Delivery {
     /**
      * Generates a unique string identifier with the format `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
      * The `x` can be a character or number from `[a-z],[A-Z],[0-9]`
-     * @returns Returns a 36 character long semi-unique identifier
+     * @returns {String}  Returns a 36 character long semi-unique identifier
      */
      generateUUID() {
         let uid = "";
