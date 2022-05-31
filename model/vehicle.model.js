@@ -53,12 +53,20 @@ class Vehicle {
      * 
      */
     static async getAllVehicles() {
-        const response = await execute("SELECT * FROM vehicles", []);
-        return response.map(v => new Vehicle(v.idvehicles,
-            v.type_of_vehicles_idtype_of_vehicles,
-            v.identifier,
-            v.storage_size,
-            v.free));
+        try {
+            const response = await execute("SELECT * FROM vehicles", []);
+            return response.map(v => new Vehicle(v.idvehicles,
+                v.type_of_vehicles_idtype_of_vehicles,
+                v.identifier,
+                v.storage_size,
+                v.free));
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+      
     }
     /**
      * The function get a 1 delivery from the database with the provided id 
@@ -66,11 +74,18 @@ class Vehicle {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getVehicle(id = Number) {
+        try {
+            const response = await execute("SELECT * FROM vehicles WHERE idvehicles=?", [`${id}`])
 
-        const response = await execute("SELECT * FROM vehicles WHERE idvehicles=?", [`${id}`])
-
-        return new Vehicle(response[0].idvehicles, response[0].type_of_vehicles_idtype_of_vehicles, response[0].identifier, response[0].storage_size, response[0].free)
-
+            return new Vehicle(response[0].idvehicles, response[0].type_of_vehicles_idtype_of_vehicles, response[0].identifier, response[0].storage_size, response[0].free)
+    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+    
     }
     /**
      * 
@@ -79,7 +94,8 @@ class Vehicle {
     static async updateVehicle(
         newVehicle = Vehicle
     ) {
-        const getUpdatedVehicle = await execute("SELECT * FROM vehicles WHERE idvehicles=?", [`${newVehicle.getIdVehicles()}`])
+        try {
+            const getUpdatedVehicle = await execute("SELECT * FROM vehicles WHERE idvehicles=?", [`${newVehicle.getIdVehicles()}`])
         if (!newVehicle.equals(getUpdatedVehicle[0])) {
             const response = await execute(
                 "UPDATE vehicles"
@@ -93,6 +109,13 @@ class Vehicle {
         } else {
             return "Vehicle was not updated, because the vehicle info is the same"
         }
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+        
 
     }
     /**
@@ -101,14 +124,22 @@ class Vehicle {
      * @returns the deleted Vehicle item and if it was successful
      */
     static async deleteVehicle(id = Number) {
-        const getDeletedDelivery = await execute("SELECT from vehicles Where idvehicles=", [`${id}`]);
-        const response = await execute("DELETE from vehicles Where idvehicles=", [`${id}`]);
-        return new Vehicle(
-            getDeletedDelivery[0].idvehicles,
-            getDeletedDelivery[0].type_of_vehicles_idtype_of_vehicles,
-            getDeletedDelivery[0].identifier,
-            getDeletedDelivery[0].storage_size,
-            getDeletedDelivery[0].free)
+        try {
+            const getDeletedDelivery = await execute("SELECT from vehicles Where idvehicles=", [`${id}`]);
+            const response = await execute("DELETE from vehicles Where idvehicles=", [`${id}`]);
+            return new Vehicle(
+                getDeletedDelivery[0].idvehicles,
+                getDeletedDelivery[0].type_of_vehicles_idtype_of_vehicles,
+                getDeletedDelivery[0].identifier,
+                getDeletedDelivery[0].storage_size,
+                getDeletedDelivery[0].free)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+      
     }
     /**
    * Creates a new Vehicle entry in the database
@@ -116,13 +147,21 @@ class Vehicle {
    * @returns  Return the newly created Vehicle
    */
     static async createVehicle(newVehicle = Vehicle) {
-        const response = await execute("INSERT INTO vehicles (type_of_vehicles_idtype_of_vehicles,identifier,storage_size,free)"
+        try {
+            const response = await execute("INSERT INTO vehicles (type_of_vehicles_idtype_of_vehicles,identifier,storage_size,free)"
             + "VALUES(?,?,?,?)",
             [`${newVehicle.getTypeOfVehicle}`
                 `${newVehicle.getIdentifier()}`,
             `${newVehicle.getStorageSize()}`,
             `${newVehicle.getFree()}`,])
         return newVehicle;
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+     
     }
 }
 module.exports = {
