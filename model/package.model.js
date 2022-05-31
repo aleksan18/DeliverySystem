@@ -99,7 +99,8 @@ class Package {
      * 
      */
     static async getAllPackages() {
-        const response = await execute("SELECT * FROM Packages", []);
+        try {
+            const response = await execute("SELECT * FROM Packages", []);
         return response.map(v =>
             new Package(
                 v.idpackages,
@@ -112,6 +113,13 @@ class Package {
                 v.electronics,
                 v.oddsized,
                 v.receiver_id));
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
     }
     /**
      * The function get a 1 Package from the database with the provided id 
@@ -119,20 +127,27 @@ class Package {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getPackage(id = Number) {
+        try {
+            const response = await execute("SELECT * FROM Packages WHERE idpackages=?", [`${id}`])
 
-        const response = await execute("SELECT * FROM Packages WHERE idpackages=?", [`${id}`])
-
-        return new Package(
-            response[0].idpackages,
-            response[0].user_iduser,
-            response[0].weight,
-            response[0].height,
-            response[0].width,
-            response[0].depth,
-            response[0].fragile,
-            response[0].electronics,
-            response[0].oddsized,
-            response[0].receiver_id)
+            return new Package(
+                response[0].idpackages,
+                response[0].user_iduser,
+                response[0].weight,
+                response[0].height,
+                response[0].width,
+                response[0].depth,
+                response[0].fragile,
+                response[0].electronics,
+                response[0].oddsized,
+                response[0].receiver_id)  
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
 
     }
     /**
@@ -142,7 +157,8 @@ class Package {
     static async updatePackage(
         newPackage = Package
     ) {
-        const getUpdatedPackage = await execute("SELECT * FROM Packages WHERE idpackages=?", [`${newPackage.getIdPackage()}`])
+        try {
+            const getUpdatedPackage = await execute("SELECT * FROM Packages WHERE idpackages=?", [`${newPackage.getIdPackage()}`])
         if (!newPackage.equals(getUpdatedPackage[0])) {
             const response = await execute(
                 "UPDATE Packages"
@@ -171,6 +187,13 @@ class Package {
         } else {
             return "Package was not updated, because the package info is the same"
         }
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
 
     }
     /**
@@ -179,7 +202,8 @@ class Package {
      * @returns the deleted Package item and if it was successful
      */
     static async deletePackage(id = Number) {
-        const getDeletedPackage = await execute("SELECT from Packages Where idpackages=", [`${id}`]);
+        try {
+            const getDeletedPackage = await execute("SELECT from Packages Where idpackages=", [`${id}`]);
         const response = await execute("DELETE from Packages Where idpackages=", [`${id}`]);
         return new Package(
             getDeletedPackage[0].idpackages,
@@ -192,6 +216,13 @@ class Package {
             getDeletedPackage[0].electronics,
             getDeletedPackage[0].oddsized,
             getDeletedPackage[0].receiver_id)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
     }
     /**
       * Creates a new Package entry in the database
@@ -201,7 +232,8 @@ class Package {
     static async createPackage(
         newPackage = Package
     ) {
-        const response = await execute("INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
+        try {
+            const response = await execute("INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
             + "VALUES (?,?,?,?,?,?,?,?,?);",
             [newPackage.getUserId(),
             newPackage.getWeight(),
@@ -214,6 +246,13 @@ class Package {
             newPackage.getReceiverId()])
         console.log("createPackage response: ", response)
         return response;
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
     }
 }
 module.exports = {

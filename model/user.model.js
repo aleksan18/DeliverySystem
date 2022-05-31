@@ -13,6 +13,7 @@ class User {
     duns;
     zip_city_zipcode_idzipcode;
     zip_city_city_idcity;
+    password
     constructor(
         idcustomer = Number || null,
         type_of_user = Number,
@@ -25,6 +26,7 @@ class User {
         duns = String || null,
         zip_city_zipcode_idzipcode = Number,
         zip_city_city_idcity = Number,
+        password = String
     ) {
         this.idcustomer = idcustomer;
         this.type_of_user = type_of_user;
@@ -37,6 +39,7 @@ class User {
         this.duns = duns;
         this.zip_city_zipcode_idzipcode = zip_city_zipcode_idzipcode;
         this.zip_city_city_idcity = zip_city_city_idcity;
+        this.password = password;
     }
     toString() {
         console.log("toString called");
@@ -78,6 +81,9 @@ class User {
 
     getCity() { return this.zip_city_city_idcity }
     setCity(value) { this.zip_city_city_idcity = value }
+
+    getPassword() { return this.password }
+    setPassword(value) { this.password = value }
     equals(user = new User) {
         return user.getIdCustomer() == this.idcustomer &&
             user.getTypeOfUser() == this.type_of_user &&
@@ -89,8 +95,9 @@ class User {
             user.getAddress() == this.address &&
             user.getDuns() == this.duns &&
             user.getZipCode() == this.zip_city_zipcode_idzipcode &&
-            user.getCity() == this.zip_city_city_idcity
-    }
+            user.getCity() == this.zip_city_city_idcity &&
+            user.getPassword()== this.password
+        }
     /*
     Static functions used to call the database without needing to initialize the class
     they return instance of User
@@ -100,19 +107,28 @@ class User {
      * 
      */
     static async getAllUsers() {
-        const response = await execute("SELECT * FROM user", []);
-        return response.map(v => new User(
-            v.idcustomer,
-            v.type_of_user,
-            v.firstname,
-            v.secondname,
-            v.companyname,
-            v.email,
-            v.phone,
-            v.address,
-            v.duns,
-            v.zip_city_zipcode_idzipcode,
-            v.zip_city_city_idcity))
+        try {
+            const response = await execute("SELECT * FROM user", []);
+            return response.map(v => new User(
+                v.idcustomer,
+                v.type_of_user,
+                v.firstname,
+                v.secondname,
+                v.companyname,
+                v.email,
+                v.phone,
+                v.address,
+                v.duns,
+                v.zip_city_zipcode_idzipcode,
+                v.zip_city_city_idcity,
+                v.password))    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+       
     }
     /**
      * The function get a 1 User from the database with the provided id 
@@ -120,20 +136,58 @@ class User {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getUser(id = Number) {
+        try {
+            const response = await execute("SELECT * FROM user WHERE idcustomer=?", [`${id}`])
 
-        const response = await execute("SELECT * FROM user WHERE idcustomer=?", [`${id}`])
+            return new User(response[0].idcustomer,
+                response[0].type_of_user,
+                response[0].firstname,
+                response[0].secondname,
+                response[0].companyname,
+                response[0].email,
+                response[0].phone,
+                response[0].address,
+                response[0].duns,
+                response[0].zip_city_zipcode_idzipcode,
+                response[0].zip_city_city_idcity,
+                response[0].password)   
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+        
 
-        return new User(response[0].idcustomer,
-            response[0].type_of_user,
-            response[0].firstname,
-            response[0].secondname,
-            response[0].companyname,
-            response[0].email,
-            response[0].phone,
-            response[0].address,
-            response[0].duns,
-            response[0].zip_city_zipcode_idzipcode,
-            response[0].zip_city_city_idcity)
+    }
+    /**
+     * Function that gets a user from the database with the provided email
+     * @param {String} email Email of the user to search the database
+     * @returns Returns a user object
+     */
+    static async getUserByEmail(email) {
+        try {
+            const response = await execute("SELECT * FROM user WHERE email=?", [`${email}`])
+            return new User(response[0].idcustomer,
+                response[0].type_of_user,
+                response[0].firstname,
+                response[0].secondname,
+                response[0].companyname,
+                response[0].email,
+                response[0].phone,
+                response[0].address,
+                response[0].duns,
+                response[0].zip_city_zipcode_idzipcode,
+                response[0].zip_city_city_idcity,
+                response[0].password)   
+        } catch (error) {
+            //console.log(error);
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+       
 
     }
     /**
@@ -144,40 +198,50 @@ class User {
     static async updateUser(
         newUser = User
     ) {
-        const getUpdatedUser = await execute("SELECT * FROM user WHERE idcustomer=?", [`${newUser.getIdCustomer()}`])
-        if (!newUser.equals(Object.assign(new User(), getUpdatedUser[0]))) {
-            const response = await execute(
-                "UPDATE user"
-                + " SET type_of_user=?,firstname=?,secondname=?,companyname=?,email=?,phone=?,address=?,duns=?,zip_city_zipcode_idzipcode=?,zip_city_city_idcity=? WHERE idcustomer=?"
-                , [`${newUser.getTypeOfUser()}`,
-                `${newUser.getFirstName()}`,
-                `${newUser.getSecondName()}`,
-                `${newUser.getCompanyName()}`,
-                `${newUser.getEmail()}`,
-                `${newUser.getPhone()}`,
-                `${newUser.getAddress()}`,
-                `${newUser.getDuns()}`,
-                `${newUser.getZipCode()}`,
-                `${newUser.getCity()}`,
-                `${newUser.getIdCustomer()}`]);
-            console.log(response);
-
-            return new User(
-                getUpdatedUser[0].idcustomer,
-                getUpdatedUser[0].type_of_user,
-                getUpdatedUser[0].firstname,
-                getUpdatedUser[0].secondname,
-                getUpdatedUser[0].companyname,
-                getUpdatedUser[0].email,
-                getUpdatedUser[0].phone,
-                getUpdatedUser[0].address,
-                getUpdatedUser[0].duns,
-                getUpdatedUser[0].zip_city_zipcode_idzipcode,
-                getUpdatedUser[0].zip_city_city_idcity)
+        try {
+            const getUpdatedUser = await execute("SELECT * FROM user WHERE idcustomer=?", [`${newUser.getIdCustomer()}`])
+            if (!newUser.equals(Object.assign(new User(), getUpdatedUser[0]))) {
+                const response = await execute(
+                    "UPDATE user"
+                    + " SET type_of_user=?,firstname=?,secondname=?,companyname=?,email=?,phone=?,address=?,duns=?,zip_city_zipcode_idzipcode=?,zip_city_city_idcity=?,password=? WHERE idcustomer=?"
+                    , [`${newUser.getTypeOfUser()}`,
+                    `${newUser.getFirstName()}`,
+                    `${newUser.getSecondName()}`,
+                    `${newUser.getCompanyName()}`,
+                    `${newUser.getEmail()}`,
+                    `${newUser.getPhone()}`,
+                    `${newUser.getAddress()}`,
+                    `${newUser.getDuns()}`,
+                    `${newUser.getZipCode()}`,
+                    `${newUser.getCity()}`,
+                    `${newUser.getIdCustomer()}`,
+                    `${newUser.getPassword()}`]);
+                console.log(response);
+    
+                return new User(
+                    getUpdatedUser[0].idcustomer,
+                    getUpdatedUser[0].type_of_user,
+                    getUpdatedUser[0].firstname,
+                    getUpdatedUser[0].secondname,
+                    getUpdatedUser[0].companyname,
+                    getUpdatedUser[0].email,
+                    getUpdatedUser[0].phone,
+                    getUpdatedUser[0].address,
+                    getUpdatedUser[0].duns,
+                    getUpdatedUser[0].zip_city_zipcode_idzipcode,
+                    getUpdatedUser[0].zip_city_city_idcity,
+                    getUpdatedUser[0].password,)
+            }
+            else {
+                return "User was not updated, because the user info is the same"
+            }
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
         }
-        else {
-            return "User was not updated, because the user info is the same"
-        }
+       
     }
     /**
      * 
@@ -185,7 +249,8 @@ class User {
      * @returns the deleted user item and if it was successful
      */
     static async deleteUser(id = Number) {
-        const getDeletedUser = await execute("SELECT from user Where idcustomer=", [`${id}`]);
+        try {
+            const getDeletedUser = await execute("SELECT from user Where idcustomer=", [`${id}`]);
         const response = await execute("DELETE from user Where idcustomer=", [`${id}`]);
         console.log(response);
         return new User(getDeletedUser[0].idcustomer,
@@ -198,7 +263,15 @@ class User {
             getDeletedUser[0].address,
             getDeletedUser[0].duns,
             getDeletedUser[0].zip_city_zipcode_idzipcode,
-            getDeletedUser[0].zip_city_city_idcity)
+            getDeletedUser[0].zip_city_city_idcity,
+            getDeletedUser[0].password)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+        
     }
     /**
     * Creates a new user entry in the database
@@ -208,8 +281,9 @@ class User {
     static async createUser(
         newUser = User
     ) {
-        const response = await execute("INSERT INTO user (type_of_user,firstname,secondname,companyname,email,phone,address,duns,zip_city_zipcode_idzipcode,zip_city_city_idcity)"
-            + "VALUES(?,?,?,?,?,?,?,?,?,?)",
+        try {
+            const response = await execute("INSERT INTO user (type_of_user,firstname,secondname,companyname,email,phone,address,duns,zip_city_zipcode_idzipcode,zip_city_city_idcity,password)"
+            + "VALUES(?,?,?,?,?,?,?,?,?,?,?)",
             [`${newUser.getTypeOfUser()}`,
             `${newUser.getFirstName()}`,
             `${newUser.getSecondName()}`,
@@ -219,10 +293,18 @@ class User {
             `${newUser.getAddress()}`,
             `${newUser.getDuns()}`,
             `${newUser.getZipCode()}`,
-            `${newUser.getCity()}`,]);
+            `${newUser.getCity()}`,
+            `${newUser.getPassword()}`]);
         console.log(response);
 
-        return newUser;
+        return newUser;   
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }  
+        }
+       
     }
 
 }

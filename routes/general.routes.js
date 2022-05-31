@@ -2,7 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const { check, validationResult } = require("express-validator");
 const req = require("express/lib/request");
-const { execute } = require("../database/mysql.connector")
+const { executeTransaction } = require("../database/mysql.connector")
 const { Driver } = require("../model/driver.model");
 const { Vehicle } = require("../model/vehicle.model")
 
@@ -185,8 +185,109 @@ router.delete("deleteVehicle/:id", [
         });
     }
 })
-
-
+router.post("/createDeliveryTransaction",async (req, res)=>{
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array(),
+                message: "Invalid data while deleting a Vehicle",
+            });
+        }
+        const {newPackage,newDelivery,newPayment} = req.body;
+        const response = await executeTransaction(["INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
+        + "VALUES (LAST_INSERT_ID(),?,?,?,?,?,?,?,?);",
+        "INSERT INTO payment(typeofpayment_idtypeofpayment,amount,payed,prepaid,transactionid,billing_address) VALUES(?,?,?,?,?,?)",
+        "INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
+        + "VALUES ((SELECT MAX(idpackages) FROM packages),?,LAST_INSERT_ID(),?,?,?,?,?,?,?,?);"],
+        [
+            [
+                `${newPackage.weight}`,
+                `${newPackage.height}`,
+                `${newPackage.width}`,
+                `${newPackage.depth}`,
+                `${newPackage.fragile}`,
+                `${newPackage.electronics}`,
+                `${newPackage.oddsized}`,
+                `${newPackage.receiver_iduser}`],
+                [
+                    `${newPayment.typeofpayment_idtypeofpayment}`,
+                    `${newPayment.amount}`,
+                    `${newPayment.payed}`,
+                    `${newPayment.prepaid}`,
+                    `${newPayment.transactionid}`,
+                    `${newPayment.billing_address}`,
+                ],
+                [
+                    `${newDelivery.priority}`,
+                    `${newDelivery.international}`,
+                    `${newDelivery.start_location}`,
+                    `${newDelivery.end_location}`,
+                    `${newDelivery.message}`,
+                    `${newDelivery.estimated_date}`,
+                    `${newDelivery.start_date}`,
+                    `${newDelivery.end_date}`,
+                    `${newDelivery.uid}`,
+                ]
+        ])
+        console.log(response);
+        res.status(200).json({response});
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Invalid data",
+            errors: [
+                { value: error, msg: error.message },
+            ],
+        });
+    }
+})
+router.post("/transaction",async (req, res)=>{
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array(),
+                message: "Invalid data while deleting a Vehicle",
+            });
+        }
+        const {newUser,newPackage} = req.body;
+        const response = await executeTransaction(["INSERT INTO user (type_of_user,firstname,secondname,companyname,email,phone,address,duns,zip_city_zipcode_idzipcode,zip_city_city_idcity,password)"
+        + "VALUES(?,?,?,?,?,?,?,?,?,?,?)","INSERT INTO packages(user_iduser,weight,height,width,depth,fragile,electronics,oddsized,receiver_iduser) "
+        + "VALUES (LAST_INSERT_ID(),?,?,?,?,?,?,?,?);"],[
+            [`${newUser.type_of_user}`,
+            `${newUser.firstname}`,
+            `${newUser.secondname}`,
+            `${newUser.companyname}`,
+            `${newUser.email}`,
+            `${newUser.phone}`,
+            `${newUser.address}`,
+            `${newUser.duns}`,
+            `${newUser.zip_city_zipcode_idzipcode}`,
+            `${newUser.zip_city_city_idcity}`,
+            `${newUser.password}`,],
+            [
+                `${newPackage.weight}`,
+                `${newPackage.height}`,
+                `${newPackage.width}`,
+                `${newPackage.depth}`,
+                `${newPackage.fragile}`,
+                `${newPackage.electronics}`,
+                `${newPackage.oddsized}`,
+                `${newPackage.receiver_iduser}`]  
+        ])
+        console.log(response);
+        res.status(200).json({response});
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Invalid data",
+            errors: [
+                { value: error, msg: error.message },
+            ],
+        });
+    }
+})
 
 
 module.exports = router;

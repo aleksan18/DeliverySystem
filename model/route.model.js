@@ -95,7 +95,8 @@ class Route {
      * 
      */
     static async getAllRoutes() {
-        const response = await execute("SELECT * FROM routes", []);
+        try {
+            const response = await execute("SELECT * FROM routes", []);
         return response.map(v =>
             new Route(
                 v.idroutes,
@@ -109,6 +110,13 @@ class Route {
                 v.route_order,
                 v.start_date,
                 v.end_date));
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
     }
     /**
      * The function get a 1 routes from the database with the provided id 
@@ -116,8 +124,8 @@ class Route {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getRoute(id = Number) {
-
-        const response = await execute("SELECT * FROM routes WHERE idroutes=?", [`${id}`])
+        try {
+            const response = await execute("SELECT * FROM routes WHERE idroutes=?", [`${id}`])
 
         return new Route(
             response[0].idroutes,
@@ -131,6 +139,13 @@ class Route {
             response[0].route_order,
             response[0].start_date,
             response[0].end_date)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
 
     }
     /**
@@ -140,7 +155,8 @@ class Route {
     static async updateRoute(
         newRoute = Route
     ) {
-        const getUpdatedRoute = await execute("SELECT * FROM routes WHERE idroutes=?", [`${newRoute.getIdRoutes()}`])
+        try {
+            const getUpdatedRoute = await execute("SELECT * FROM routes WHERE idroutes=?", [`${newRoute.getIdRoutes()}`])
         if (!newRoute.equals(getUpdatedRoute[0])) {
             const response = await execute(
                 "UPDATE routes"
@@ -172,6 +188,13 @@ class Route {
         } else {
             return "Route was not updated, because the route info is the same"
         }
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
     }
     /**
      * 
@@ -179,20 +202,28 @@ class Route {
      * @returns the deleted Route item and if it was successful
      */
     static async deleteRoute(id = Number) {
-        const getDeletedroutes = await execute("SELECT from routes Where idroutes=", [`${id}`]);
-        const response = await execute("DELETE from routes Where idroutes=", [`${id}`]);
-        return new Route(
-            getDeletedroutes[0].idroutes,
-            getDeletedroutes[0].vehicles_idvehicles,
-            getDeletedroutes[0].employees_idemployees,
-            getDeletedroutes[0].typeofroute_idtypeofroute,
-            getDeletedroutes[0].start_location,
-            getDeletedroutes[0].end_location,
-            getDeletedroutes[0].international,
-            getDeletedroutes[0].deliveries_iddeliveries,
-            getDeletedroutes[0].route_order,
-            getDeletedroutes[0].start_date,
-            getDeletedroutes[0].end_date)
+        try {
+            const getDeletedroutes = await execute("SELECT from routes Where idroutes=", [`${id}`]);
+            const response = await execute("DELETE from routes Where idroutes=", [`${id}`]);
+            return new Route(
+                getDeletedroutes[0].idroutes,
+                getDeletedroutes[0].vehicles_idvehicles,
+                getDeletedroutes[0].employees_idemployees,
+                getDeletedroutes[0].typeofroute_idtypeofroute,
+                getDeletedroutes[0].start_location,
+                getDeletedroutes[0].end_location,
+                getDeletedroutes[0].international,
+                getDeletedroutes[0].deliveries_iddeliveries,
+                getDeletedroutes[0].route_order,
+                getDeletedroutes[0].start_date,
+                getDeletedroutes[0].end_date)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
     }
     /**
      * Creates a new Route entry in the database
@@ -202,7 +233,8 @@ class Route {
     static async createRoutes(
         newRoute = Route
     ) {
-        const response = await execute("INSERT INTO Routes(vehicles_idvehicles,employees_idemployees,typeofroute_idtypeofroute,start_location,end_location,international,deliveries_iddeliveries,route_order,start_date,end_date)"
+        try {
+            const response = await execute("INSERT INTO Routes(vehicles_idvehicles,employees_idemployees,typeofroute_idtypeofroute,start_location,end_location,international,deliveries_iddeliveries,route_order,start_date,end_date)"
             + "VALUES(?,?,?,?,?,?,?,?,?,?)",
             [`${newRoute.getIdVehicle()}`,
             `${newRoute.getIdEmployees()}`,
@@ -215,7 +247,14 @@ class Route {
                 `${newRoute.getStartDate()}`,
             `${newRoute.getEndDate()}`,])
         console.log(response);
-        return newRoute;
+        return newRoute; 
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
     }
 }
 module.exports = {

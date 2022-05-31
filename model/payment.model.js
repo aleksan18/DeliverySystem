@@ -1,5 +1,6 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
+const { characterGenerator, numberGenerator,transactionDateGenerator } = require("../utility/utility.generators.js");
 
 class Payment {
     #idpayment;
@@ -80,8 +81,23 @@ class Payment {
      * 
      */
     static async getAllPayments() {
-        const response = await execute("SELECT * FROM payment", []);
-        return response.map(v => Object.assign(new Payment(), v));
+        try {
+            const response = await execute("SELECT * FROM payment", []);
+            return response.map(v => new Payment( 
+                v.idpayment, 
+                v.typeofpayment_idtypeofpayment,
+                v.amount,
+                v.payed,
+                v.prepaid,
+                v.transactionid,
+                v.billing_address));  
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+      
     }
     /**
      * The function get a 1 Payment from the database with the provided id 
@@ -89,11 +105,25 @@ class Payment {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getPayment(id = Number) {
+        try {
+            const response = await execute("SELECT * FROM payment WHERE idpayment=?", [`${id}`])
 
-        const response = await execute("SELECT * FROM payment WHERE idpayment=?", [`${id}`])
-
-        return Object.assign(new Payment(), response[0])
-
+            return new Payment( 
+                response[0].idpayment, 
+                response[0].typeofpayment_idtypeofpayment,
+                response[0].amount,
+                response[0].payed,
+                response[0].prepaid,
+                response[0].transactionid,
+                response[0].billing_address)
+    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+   
     }
     /**
      * 
@@ -102,8 +132,9 @@ class Payment {
     static async updatePayment(
         newPayment = new Payment
     ) {
-        const getUpdatedPayment = await execute("SELECT * FROM payment WHERE idpayment=?", [`${newPayment.getIdPayment()}`])
-        if (newPayment.equals(getUpdatedPayment[0])) {
+        try {
+            const getUpdatedPayment = await execute("SELECT * FROM payment WHERE idpayment=?", [`${newPayment.getIdPayment()}`])
+        if (!newPayment.equals(getUpdatedPayment[0])) {
             const response = await execute(
                 "UPDATE payment"
                 + "SET(typeofpayment_idtypeofpayment=?,amount=?,payed=?,prepaid=?,transactionid=?,billing_address=?) WHERE idpayment=?"
@@ -114,8 +145,20 @@ class Payment {
                 `${newPayment.getTransactionid()}`,
                 `${newPayment.getBillingAddress()}`,
                 `${newPayment.getIdPayment}`,])
-            return Object.assign(new Payment(), getUpdatedPayment[0])
+            return new Payment( getUpdatedPayment[0].idpayment, 
+                getUpdatedPayment[0].typeofpayment_idtypeofpayment,
+                getUpdatedPayment[0].amount,getUpdatedPayment[0].payed,
+                getUpdatedPayment[0].prepaid,getUpdatedPayment[0].transactionid,getUpdatedPayment[0].billing_address)
+        }else{
+            return "Payment was not updated, because the vehicle info is the same"
         }
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+        
 
     }
     /**
@@ -124,9 +167,25 @@ class Payment {
      * @returns the deleted Payment item and if it was successful
      */
     static async deletePayment(id = Number) {
-        const getDeletedPayment = await execute("SELECT FROM payment WHERE idpayment=", [`${id}`]);
-        const response = await execute("DELETE FROM payment WHERE idpayment=", [`${id}`]);
-        return Object.assign(new Payment(), getDeletedPayment[0])
+        try {
+            const getDeletedPayment = await execute("SELECT FROM payment WHERE idpayment=", [`${id}`]);
+            if(getDeletedPayment[0]){
+                const response = await execute("DELETE FROM payment WHERE idpayment=", [`${id}`]);
+                return new Payment( getDeletedPayment[0].idpayment, 
+                    getDeletedPayment[0].typeofpayment_idtypeofpayment,
+                    getDeletedPayment[0].amount,getDeletedPayment[0].payed,
+                    getDeletedPayment[0].prepaid,getDeletedPayment[0].transactionid,getDeletedPayment[0].billing_address)
+            }else{
+                return "Payment was not deleted because a payment with that id does not exist."
+            }
+            
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+       
     }
     /**
       * Creates a new Payment entry in the database
@@ -136,16 +195,34 @@ class Payment {
     static async createPayment(
         newPayment = new Payment
     ) {
-        const response = await execute("INSERT INTO payment(typeofpayment_idtypeofpayment,amount,payed,prepaid,transactionid,billing_address) "
+        try {
+            const response = await execute("INSERT INTO payment(typeofpayment_idtypeofpayment,amount,payed,prepaid,transactionid,billing_address) "
             + "VALUES (?,?,?,?,?,?);",
             [newPayment.getTpeOfPaymentId(),
             newPayment.getAmount(),
             newPayment.getPayed(),
             newPayment.getPrepaid(),
-            newPayment.getTransactionid(),
+            generateTransactionId(),
             newPayment.getBillingAddress()])
         console.log("createPayment response: ", response)
         return response;
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+       
+    }
+    /**
+     * Generates a unique string id with the  format `xxxxxxxxNNNNN - ddmmyy`
+     *  The `x` represents a character or number from `[a-z],[A-Z],[0-9]` that has been generated randomly.
+     * The `N` represents a number from `[0-9]` that has been generated randomly.
+     * The `ddmmyy` is based on the current date. `yy` is the last two numbers of the year.
+     * @returns {String}  Returns a 20 character long semi-unique identifier.
+     */
+    generateTransactionId(){
+        return characterGenerator(8)+numberGenerator(5)+"-"+transactionDateGenerator()
     }
 }
 module.exports = {
