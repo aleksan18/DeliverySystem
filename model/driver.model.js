@@ -57,14 +57,22 @@ class Driver {
      * 
      */
     static async getAllDrivers() {
-        const response = await execute("SELECT * FROM driver", []);
-        return response.map(v => new Driver(
-            v.idemployees,
-            v.firstname,
-            v.secondname,
-            v.email,
-            v.phone,
-            v.free));
+        try {
+            const response = await execute("SELECT * FROM driver", []);
+            return response.map(v => new Driver(
+                v.idemployees,
+                v.firstname,
+                v.secondname,
+                v.email,
+                v.phone,
+                v.free));   
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+      
     }
     /**
      * The function get a 1 driver from the database with the provided id 
@@ -72,16 +80,23 @@ class Driver {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getDriver(id = Number) {
+        try {
+            const response = await execute("SELECT * FROM driver WHERE idemployees=?", [`${id}`])
 
-        const response = await execute("SELECT * FROM driver WHERE idemployees=?", [`${id}`])
-
-        return new Driver(
-            response[0].idemployees,
-            response[0].firstname,
-            response[0].secondname,
-            response[0].email,
-            response[0].phone,
-            response[0].free)
+            return new Driver(
+                response[0].idemployees,
+                response[0].firstname,
+                response[0].secondname,
+                response[0].email,
+                response[0].phone,
+                response[0].free)   
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
+        }
+       
 
     }
     /**
@@ -91,27 +106,35 @@ class Driver {
     static async updateDriver(
         newDriver = Driver
     ) {
-        const getUpdatedDriver = await execute("SELECT * FROM driver WHERE idemployees=?", [`${newDriver.getIdEmployees()}`])
-        if (!newDriver.equals(getUpdatedDriver[0])) {
-            const response = await execute(
-                "UPDATE Driver"
-                + "SET firstname=?,secondname=?,email=?,phone=?,free=? WHERE idemployees=?"
-                , [`${newUser.getFirstName()}`
-                    , `${newUser.getSecondName()}`,
-                `${newUser.getEmail()}`,
-                `${newUser.getPhone()}`,
-                `${newUser.getFree()}`,
-                `${newDriver.getIdEmployees()}`])
-            return new Driver(
-                getUpdatedDriver[0].idemployees,
-                getUpdatedDriver[0].firstname,
-                getUpdatedDriver[0].secondname,
-                getUpdatedDriver[0].email,
-                getUpdatedDriver[0].phone,
-                getUpdatedDriver[0].free)
-        } {
-            return "Driver was not updated, because the driver info is the same"
+        try {
+            const getUpdatedDriver = await execute("SELECT * FROM driver WHERE idemployees=?", [`${newDriver.getIdEmployees()}`])
+            if (!newDriver.equals(getUpdatedDriver[0])) {
+                const response = await execute(
+                    "UPDATE Driver"
+                    + "SET firstname=?,secondname=?,email=?,phone=?,free=? WHERE idemployees=?"
+                    , [`${newUser.getFirstName()}`
+                        , `${newUser.getSecondName()}`,
+                    `${newUser.getEmail()}`,
+                    `${newUser.getPhone()}`,
+                    `${newUser.getFree()}`,
+                    `${newDriver.getIdEmployees()}`])
+                return new Driver(
+                    getUpdatedDriver[0].idemployees,
+                    getUpdatedDriver[0].firstname,
+                    getUpdatedDriver[0].secondname,
+                    getUpdatedDriver[0].email,
+                    getUpdatedDriver[0].phone,
+                    getUpdatedDriver[0].free)
+            } {
+                return "Driver was not updated, because the driver info is the same"
+            }    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            } 
         }
+        
 
     }
     /**
@@ -120,15 +143,23 @@ class Driver {
      * @returns the deleted driver item and if it was successful
      */
     static async deleteDriver(id = Number) {
-        const getDeletedDriver = await execute("SELECT from driver Where idemployees=", [`${id}`]);
-        const response = await execute("DELETE from driver Where idemployees=", [`${id}`]);
-        return new Driver(
-            getDeletedDriver[0].idemployees,
-            getDeletedDriver[0].firstname,
-            getDeletedDriver[0].secondname,
-            getDeletedDriver[0].email,
-            getDeletedDriver[0].phone,
-            getDeletedDriver[0].free)
+        try {
+            const getDeletedDriver = await execute("SELECT from driver Where idemployees=", [`${id}`]);
+            const response = await execute("DELETE from driver Where idemployees=", [`${id}`]);
+            return new Driver(
+                getDeletedDriver[0].idemployees,
+                getDeletedDriver[0].firstname,
+                getDeletedDriver[0].secondname,
+                getDeletedDriver[0].email,
+                getDeletedDriver[0].phone,
+                getDeletedDriver[0].free)    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+        
     }
     /**
      * Creates a new Driver entry in the database
@@ -138,14 +169,22 @@ class Driver {
     static async createDriver(
         newDriver = Driver
     ) {
-        const response = await execute("INSERT INTO Driver (firstname,secondname,email,phone,free)"
+        try {
+            const response = await execute("INSERT INTO Driver (firstname,secondname,email,phone,free)"
             + "VALUES(?,?,?,?,?)",
             [`${newUser.getFirstName()}`,
             `${newUser.getSecondName()}`,
             `${newUser.getEmail()}`,
             `${newUser.getPhone()}`,
             `${newUser.getFree()}`,])
-        return newDriver;
+        return newDriver;    
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw { value:"Query failed", 
+                message:error.message,
+            }
+        }
+        
     }
 }
 module.exports = {
