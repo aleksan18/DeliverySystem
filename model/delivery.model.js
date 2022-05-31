@@ -1,6 +1,6 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
-
+const { characterGenerator } = require("../utility/utility.generators");
 class Delivery {
     iddeliveries;
     packages_idpackages;
@@ -158,20 +158,29 @@ class Delivery {
      * 
      */
     static async getAllDeliveries() {
-        const response = await execute("SELECT * FROM deliveries;", []);
-        return response.map(v => new Delivery(
-            v.iddeliveries,
-            v.packages_idpackages,
-            v.priority,
-            v.payment_idpayment,
-            v.international,
-            v.start_location,
-            v.end_location,
-            v.message,
-            v.estimated_date,
-            v.start_date,
-            v.end_date,
-            v.uid));
+        try {
+            const response = await execute("SELECT * FROM deliveries", []);
+            return response.map(v => new Delivery(
+                v.iddeliveries,
+                v.packages_idpackages,
+                v.priority,
+                v.payment_idpayment,
+                v.international,
+                v.start_location,
+                v.end_location,
+                v.message,
+                v.estimated_date,
+                v.start_date,
+                v.end_date,
+                v.uid));
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw {
+                value: "Query failed",
+                message: error.message,
+            }
+        }
+
     }
     /**
      * The function get a 1 delivery from the database with the provided id 
@@ -179,21 +188,29 @@ class Delivery {
      * @param {Number} id - provide an id with which to query the database
      */
     static async getDelivery(id = Number) {
-        const response = await execute("SELECT * FROM deliveries WHERE iddeliveries=?;", [`${id}`])
-        // THE RESPONSE SHOULD BE CHECKED AND IF ID DOESNT EXISTS, THEN RETURN AN ERROR
-        return new Delivery(
-            response[0].iddeliveries,
-            response[0].packages_idpackages,
-            response[0].priority,
-            response[0].payment_idpayment,
-            response[0].international,
-            response[0].start_location,
-            response[0].end_location,
-            response[0].message,
-            response[0].estimated_date,
-            response[0].start_date,
-            response[0].end_date,
-            response[0].uid)
+        try {
+            const response = await execute("SELECT * FROM deliveries WHERE iddeliveries=?", [`${id}`])
+            return new Delivery(
+                response[0].iddeliveries,
+                response[0].packages_idpackages,
+                response[0].priority,
+                response[0].payment_idpayment,
+                response[0].international,
+                response[0].start_location,
+                response[0].end_location,
+                response[0].message,
+                response[0].estimated_date,
+                response[0].start_date,
+                response[0].end_date,
+                response[0].uid)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw {
+                value: "Query failed",
+                message: error.message,
+            }
+        }
+
     }
     /**
      *  Compares the new Delivery to the existing one and if there are changes updates the database with the new delivery.
@@ -201,47 +218,56 @@ class Delivery {
      * @returns the updated delivery objecct
      */
     static async updateDelivery(updatedDelivery = Delivery) {
-        const deliveryFromDB = await execute("SELECT * FROM deliveries WHERE uid=?;", [`${updatedDelivery.getUID()}`])
-        console.log("updateDelivery > deliveryFromDB[0]: ", deliveryFromDB[0])
-        const receivedDelivery = new Delivery(
-            deliveryFromDB[0].iddeliveries,
-            deliveryFromDB[0].packages_idpackages,
-            deliveryFromDB[0].priority,
-            deliveryFromDB[0].payment_idpayment,
-            deliveryFromDB[0].international,
-            deliveryFromDB[0].start_location,
-            deliveryFromDB[0].end_location,
-            deliveryFromDB[0].message,
-            deliveryFromDB[0].estimated_date,
-            deliveryFromDB[0].start_date,
-            deliveryFromDB[0].end_date,
-            deliveryFromDB[0].uid)
-        console.log("updateDelivery > receivedDelivery: ", receivedDelivery)
-        if (!updatedDelivery.equals(receivedDelivery)) {
-            const response = await execute(
-                "UPDATE deliveries "
-                + "SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?;"
-                , [updatedDelivery.getPackageId(),
-                updatedDelivery.getPriority(),
-                updatedDelivery.getPaymentId(),
-                updatedDelivery.getInternational(),
-                updatedDelivery.getStartLocation(),
-                updatedDelivery.getEndLocation(),
-                updatedDelivery.getMessage(),
-                updatedDelivery.getEstimatedDateInSqlFormat(),
-                updatedDelivery.getStartDateInSqlFormat(),
-                updatedDelivery.getEndDateInSqlFormat(),
-                updatedDelivery.getUID(),
-                updatedDelivery.getIdDeliveries()])
-            console.log("Inside Delivery Model > updateDelivery > response: ", response);
-            if (response.changedRows > 0) {
-                return { deliveryInfoIsSame: false, updatedDelivery }
+        try {
+            const deliveryFromDB = await execute("SELECT * FROM deliveries WHERE uid=?;", [`${updatedDelivery.getUID()}`])
+            console.log("updateDelivery > deliveryFromDB[0]: ", deliveryFromDB[0])
+            const receivedDelivery = new Delivery(
+                deliveryFromDB[0].iddeliveries,
+                deliveryFromDB[0].packages_idpackages,
+                deliveryFromDB[0].priority,
+                deliveryFromDB[0].payment_idpayment,
+                deliveryFromDB[0].international,
+                deliveryFromDB[0].start_location,
+                deliveryFromDB[0].end_location,
+                deliveryFromDB[0].message,
+                deliveryFromDB[0].estimated_date,
+                deliveryFromDB[0].start_date,
+                deliveryFromDB[0].end_date,
+                deliveryFromDB[0].uid)
+            console.log("updateDelivery > receivedDelivery: ", receivedDelivery)
+            if (!updatedDelivery.equals(receivedDelivery)) {
+                const response = await execute(
+                    "UPDATE deliveries "
+                    + "SET packages_idpackages=?,priority=?,payment_idpayment=?,international=?,start_location=?,end_location=?,message=?,estimated_date=?,start_date=?,end_date=?,uid=? WHERE iddeliveries=?;"
+                    , [updatedDelivery.getPackageId(),
+                    updatedDelivery.getPriority(),
+                    updatedDelivery.getPaymentId(),
+                    updatedDelivery.getInternational(),
+                    updatedDelivery.getStartLocation(),
+                    updatedDelivery.getEndLocation(),
+                    updatedDelivery.getMessage(),
+                    updatedDelivery.getEstimatedDateInSqlFormat(),
+                    updatedDelivery.getStartDateInSqlFormat(),
+                    updatedDelivery.getEndDateInSqlFormat(),
+                    updatedDelivery.getUID(),
+                    updatedDelivery.getIdDeliveries()])
+                console.log("Inside Delivery Model > updateDelivery > response: ", response);
+                if (response.changedRows > 0) {
+                    return { deliveryInfoIsSame: false, updatedDelivery }
+                } else {
+                    return { deliveryInfoIsSame: false, updatedDelivery: undefined };
+                }
             } else {
-                return { deliveryInfoIsSame: false, updatedDelivery: undefined };
+                return { deliveryInfoIsSame: true, updatedDelivery }
             }
-        } else {
-            return { deliveryInfoIsSame: true, updatedDelivery }
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw {
+                value: "Query failed",
+                message: error.message,
+            }
         }
+
 
     }
     /**
@@ -249,23 +275,32 @@ class Delivery {
      * @param {number} id provide the id with which to delete a delivery from the database with
      * @returns the deleted delivery item and if it was successful
      */
-    // static async deleteDelivery(id = Number) {
-    //     const getDeliveryToDelete = await execute("SELECT FROM deliveries WHERE iddeliveries=?;", [`${id}`]);
-    //     const response = await execute("DELETE FROM deliveries WHERE iddeliveries=?;", [`${id}`]);
-    //     return new Delivery(
-    //         getDeliveryToDelete[0].iddeliveries,
-    //         getDeliveryToDelete[0].packages_idpackages,
-    //         getDeliveryToDelete[0].priority,
-    //         getDeliveryToDelete[0].payment_idpayment,
-    //         getDeliveryToDelete[0].international,
-    //         getDeliveryToDelete[0].start_location,
-    //         getDeliveryToDelete[0].end_location,
-    //         getDeliveryToDelete[0].message,
-    //         getDeliveryToDelete[0].estimated_date,
-    //         getDeliveryToDelete[0].start_date,
-    //         getDeliveryToDelete[0].end_date,
-    //         getDeliveryToDelete[0].uid)
-    // }
+    static async deleteDelivery(id = Number) {
+        try {
+            const getDeletedDelivery = await execute("SELECT from deliveries Where iddeliveries=?", [`${id}`]);
+            const response = await execute("DELETE from deliveries Where iddeliveries=", [`${id}`]);
+            return new Delivery(
+                getDeletedDelivery[0].iddeliveries,
+                getDeletedDelivery[0].packages_idpackages,
+                getDeletedDelivery[0].priority,
+                getDeletedDelivery[0].payment_idpayment,
+                getDeletedDelivery[0].international,
+                getDeletedDelivery[0].start_location,
+                getDeletedDelivery[0].end_location,
+                getDeletedDelivery[0].message,
+                getDeletedDelivery[0].estimated_date,
+                getDeletedDelivery[0].start_date,
+                getDeletedDelivery[0].end_date,
+                getDeletedDelivery[0].uid)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw {
+                value: "Query failed",
+                message: error.message,
+            }
+        }
+
+    }
     /**
      * Creates a new Delivery entry in the database
      * @param {Delivery} newDelivery Provide the new delivery to create in the database 
@@ -274,29 +309,34 @@ class Delivery {
     static async createDelivery(
         newDelivery = Delivery
     ) {
-        console.log("createDelivery > newDelivery: " ,newDelivery)
-        const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
-            + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
-            [newDelivery.getPackageId(),
-            newDelivery.getPriority(),
-            newDelivery.getPaymentId(),
-            newDelivery.getInternational(),
-            newDelivery.getStartLocation(),
-            newDelivery.getEndLocation(),
-            newDelivery.getMessage(),
-            newDelivery.getEstimatedDate(),
-            newDelivery.getStartDate(),
-            newDelivery.getEndDate(),
-            newDelivery.getUID()])
-        console.log("createDelivery response: ", response)
-        if (response.affectedRows > 0) {
-            newDelivery.setIdDeliveries(response.insertId);
-            return { deliveryCreated: true, createdDelivery: newDelivery }    
-        } else {
-            return { deliveryCreated: false };
+        try {
+            const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
+                + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
+                [newDelivery.getPackageId(),
+                newDelivery.getPriority(),
+                newDelivery.getPaymentId(),
+                newDelivery.getInternational(),
+                newDelivery.getStartLocation(),
+                newDelivery.getEndLocation(),
+                newDelivery.getMessage(),
+                newDelivery.getEstimatedDate(),
+                newDelivery.getStartDate(),
+                newDelivery.getEndDate(),
+                generateUUID()])
+            console.log("createDelivery response: ", response)
+            if (response.affectedRows > 0) {
+                newDelivery.setIdDeliveries(response.insertId);
+                return { deliveryCreated: true, createdDelivery: newDelivery }
+            } else {
+                return { deliveryCreated: false };
+            }
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw {
+                value: "Query failed",
+                message: error.message,
+            }
         }
-
-
 
         // example of what createDelivery() should return 
         // OkPacket {
@@ -311,9 +351,40 @@ class Delivery {
         //   }
         // values can be accessed through response.insertId
     }
-    static async generateUUID() {
-
-        return "DASDA-SDA";
+    /**
+     * Generates a unique string identifier with the format `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+     * The `x` can be a character or number from `[a-z],[A-Z],[0-9]`
+     * @returns {String}  Returns a 36 character long semi-unique identifier
+     */
+    generateUUID() {
+        let uid = "";
+        while (uid.length < 36) {
+            console.log(uid.length)
+            switch (uid.length) {
+                case 8:
+                    console.log(uid);
+                    uid = uid + "-";
+                    console.log(uid);
+                    break;
+                case 13:
+                    console.log(uid);
+                    uid = uid + "-";
+                    console.log(uid);
+                    break;
+                case 18:
+                    uid = uid + "-";
+                    break;
+                case 23:
+                    uid = uid + "-";
+                    break;
+                default:
+                    console.log(uid);
+                    uid = uid + "" + characterGenerator(4);
+                case 36:
+                    break;
+            }
+        }
+        return uid;
     }
 }
 module.exports = {

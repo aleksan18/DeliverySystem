@@ -3,7 +3,7 @@ const router = Router();
 const { Delivery } = require("../model/delivery.model");
 const { Package } = require("../model/package.model");
 const { Payment } = require("../model/payment.model");
-const { check, validationResult } = require("express-validator")
+const { check, validationResult } = require("express-validator");
 
 router.post("/addDelivery", async (req, res) => {
     // console.log("req.body in /addDelivery ", req.body)
