@@ -11,18 +11,32 @@ const bcrypt = require("bcrypt");
 //error catching in models
 router.post("/register",
     [
-        check("typeOfUser", "Type of user not provided").exists(),
-        check("firstName", "First name not provided").exists(),
-        check("secondName", "Second name not provided").exists(),
-        check("companyName", "Company not provided").exists(),
-        check("email", "Email not provided").exists(),
-        check("phone", "Phone not provided").exists(),
-        check("address", "Address not provided").exists(),
-        check("duns", "Duns not provided").exists(),
-        check("zipcode", "Zip code not provided").exists(),
-        check("city", "City not provided").exists(),
-        check("password", "Password not provided").exists(),
-        check("confirmPassword", "Password not provided").exists(),
+        check("typeOfUser").exists({ checkFalsy: true }).withMessage("Type of user not provided").trim().toInt()
+            .isInt({ min: 1, max: 2 }).withMessage("Wrong value provided"),
+        check("firstName").exists({ checkFalsy: true }).withMessage("First name not provided").trim()
+            .isAlpha().withMessage("First name should contain only characters")
+            .isLength({ max: 45 }).withMessage("First name should be no more than 45 characters long"),
+        check("secondName").exists({ checkFalsy: true }).withMessage("Second name not provided").trim()
+            .isAlpha().withMessage("Second name should contain only characters")
+            .isLength({ max: 45 }).withMessage("Second name should be no more than 45 characters long"),
+        check("companyName").exists().withMessage("Company not provided").trim()
+            .isAlphanumeric().withMessage("Company name can have only characters and/or numbers provided")
+            .isLength({ max: 45 }).withMessage("Company name should be no more than 45 characters long"),
+        check("email").exists({ checkFalsy: true }).withMessage("Email not provided").trim()
+            .normalizeEmail().isEmail().withMessage("Wrong email format")
+            .isLength({ max: 45 }).withMessage("Email should be no more than 45 characters long"),
+        check("phone").exists({ checkFalsy: true }).withMessage("Phone not provided").trim()
+            .isMobilePhone().withMessage("Wrong phone format")
+            .isLength({ max: 16 }).withMessage("Phone should be no more than 16 characters long"),
+        check("address").exists({ checkFalsy: true }).withMessage("Address not provided").trim()
+            .isLength({ max: 70 }).withMessage("Address should be no more than 70 characters long"),
+        check("duns").exists({ checkFalsy: true }).withMessage("DUNS not provided").trim()
+            .isNumeric().withMessage("DUNS should contain only numeric values")
+            .isLength({ min: 9, max: 9 }).withMessage("DUNS should be 9 characters long (format: XXXXXXXXX)"),
+        check("zipcode").exists({ checkFalsy: true }).withMessage("Zip code not provided").trim()
+            .toInt().isInt({ min: 0 }).withMessage("Wrong value provided"),
+        check("city").exists({ checkFalsy: true }).withMessage("City not provided").trim()
+            .toInt().isInt({ min: 0 }).withMessage("Wrong value provided")
     ], async (req, res) => {
         try {
             const errors = validationResult(req);
@@ -43,10 +57,9 @@ router.post("/register",
             const hashedPassword = await bcrypt.hash(password, 12);
             const user = new User(null, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city,hashedPassword);
             console.log(user)
-            const { userCreated, createdUser }   = await User.createUser(user)
+            const { userCreated, createdUser } = await User.createUser(user)
             if (userCreated) {
                 return res.status(200).json({ response: { createdUser } });
-        
             } else {
                 return res.status(500).json({ response: { message: "Internal Server Error" } });
             }
@@ -60,19 +73,35 @@ router.post("/register",
             });
         }
     })
-router.post("/updateUser", [
-    check("idCustomer", "Id of customer not provided").exists(),
-    check("typeOfUser", "Type of user not provided").exists(),
-    check("firstName", "First name not provided").exists(),
-    check("secondName", "Second name not provided").exists(),
-    check("companyName", "Company not provided").exists(),
-    check("email", "Email not provided").exists(),
-    check("phone", "Phone not provided").exists(),
-    check("address", "Address not provided").exists(),
-    check("duns", "Duns not provided").exists(),
-    check("zipcode", "Zip code not provided").exists(),
-    check("city", "City not provided").exists(),
-    check("password", "Password not provided").exists()
+router.post("/updateUser",  [
+    check("idCustomer").exists({ checkFalsy: true }).withMessage("Customer not provided").trim()
+        .toInt().isInt({ min: 0 }).withMessage("Wrong value provided"),
+    check("typeOfUser").exists({ checkFalsy: true }).withMessage("Type of user not provided").trim().toInt()
+        .isInt({ min: 1, max: 2 }).withMessage("Wrong value provided"),
+    check("firstName").exists({ checkFalsy: true }).withMessage("First name not provided").trim()
+        .isAlpha().withMessage("First name should contain only characters")
+        .isLength({ max: 45 }).withMessage("First name should be no more than 45 characters long"),
+    check("secondName").exists({ checkFalsy: true }).withMessage("Second name not provided").trim()
+        .isAlpha().withMessage("Second name should contain only characters")
+        .isLength({ max: 45 }).withMessage("Second name should be no more than 45 characters long"),
+    check("companyName").exists().withMessage("Company not provided").trim()
+        .isAlphanumeric().withMessage("Company name can have only characters and/or numbers provided")
+        .isLength({ max: 45 }).withMessage("Company name should be no more than 45 characters long"),
+    check("email").exists({ checkFalsy: true }).withMessage("Email not provided").trim()
+        .normalizeEmail().isEmail().withMessage("Wrong email format")
+        .isLength({ max: 45 }).withMessage("Email should be no more than 45 characters long"),
+    check("phone").exists({ checkFalsy: true }).withMessage("Phone not provided").trim()
+        .isMobilePhone().withMessage("Wrong phone format")
+        .isLength({ max: 16 }).withMessage("Phone should be no more than 16 characters long"),
+    check("address").exists({ checkFalsy: true }).withMessage("Address not provided").trim()
+        .isLength({ max: 70 }).withMessage("Address should be no more than 70 characters long"),
+    check("duns").exists({ checkFalsy: true }).withMessage("DUNS not provided").trim()
+        .isNumeric().withMessage("DUNS should contain only numeric values")
+        .isLength({ min: 9, max: 9 }).withMessage("DUNS should be 9 characters long (format: XXXXXXXXX)"),
+    check("zipcode").exists({ checkFalsy: true }).withMessage("Zip code not provided").trim()
+        .toInt().isInt({ min: 0 }).withMessage("Wrong value provided"),
+    check("city").exists({ checkFalsy: true }).withMessage("City not provided").trim()
+        .toInt().isInt({ min: 0 }).withMessage("Wrong value provided")
 ], async (req, res) => {
     try {
         const errors = validationResult(req);
@@ -179,7 +208,7 @@ router.get("/getUsers", async (req, res) => {
 //             message: "Invalid data while deleting a user",
 //           });
 //        }
-       
+
 //        var {id} = req.body
 //        const response = await User.deleteUser(id)
 //        return res.status(200).json({response})
