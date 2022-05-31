@@ -1,10 +1,10 @@
 const { Router } = require("express");
 const { check, validationResult } = require("express-validator");
 
-const User = require("../models/User")
+const Route = require("../models/Route")
 
 const router = Router()
-router.get("/getUsers",async(req,res)=>{
+router.get("/getRoutes",async(req,res)=>{
 
     try {
         const errors = validationResult(req);
@@ -15,10 +15,10 @@ router.get("/getUsers",async(req,res)=>{
             });
 
         }
-        const allUsers = await User.find({});
+        const allRoutes = await Route.find({});
         // const updatedOrder = await C.findByIdAndUpdate(order._id, order, { new: true });
         //console.log(updatedOrder);
-        return res.status(200).json(allUsers);
+        return res.status(200).json(allRoutes);
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ error: error, message: error.message })
@@ -26,7 +26,7 @@ router.get("/getUsers",async(req,res)=>{
     }
   })
 
-  router.post("/getUser", async (req, res) => {
+  router.post("/getRoute", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -36,9 +36,9 @@ router.get("/getUsers",async(req,res)=>{
             });
 
         }
-        const { email } = req.body
-        const user = await User.findOne({ email });
-        return res.status(200).json(user);
+        const { id } = req.body
+        const route = await Route.findOne({ id });
+        return res.status(200).json(route);
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ error: error, message: error.message })
@@ -46,7 +46,7 @@ router.get("/getUsers",async(req,res)=>{
     }
 });
 
-router.post("/createUser", async (req, res) => {
+router.post("/createRoute", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -57,18 +57,18 @@ router.post("/createUser", async (req, res) => {
 
         }
         
-        const { user } = req.body
-        const createdUser = new User({ type_of_user: user.type_of_user, first_name: user.first_name, second_name: user.second_name, company_name: user.company_name, email: user.email, phone: user.phone, address: user.address, duns: user.duns});
-        await createdUser.save();
-        const size = new TextEncoder().encode(JSON.stringify(createdUser)).length
-        const size2 = Buffer.byteLength(JSON.stringify(createdUser))
-        console.log("User size: ", size)
-        console.log("User size 2: ", size2)
-
-        if (createdUser) {
-            return res.status(200).json({ createdUser });
+        const { route } = req.body
+        const createdRoute = new Route({ vehicle: route.vehicle, route_type: route.route_type, start_location: route.start_location, end_location: route.end_location, international: route.international, delivery: route.delivery, start_date: route.start_date, end_date: route.end_date, route_order: route.route_order});
+        await createdRoute.save();
+        const size = new TextEncoder().encode(JSON.stringify(createdRoute)).length
+        const size2 = Buffer.byteLength(JSON.stringify(createdRoute))
+        console.log("Route size: ", size)
+        console.log("Route size 2: ", size2)
+        
+        if (createdRoute) {
+            return res.status(200).json({ createdRoute });
         } else {
-            return res.status(500).json({ createdUser }); // actually I dont know what sata type will be createdStudent if saving fails
+            return res.status(500).json({ createdRoute }); // actually I dont know what sata type will be createdStudent if saving fails
         }
     } catch (error) {
         console.log(error);
@@ -77,7 +77,7 @@ router.post("/createUser", async (req, res) => {
     }
 });
 
-router.post("/updateUser", async (req, res) => {
+router.post("/updateRoute", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -88,22 +88,13 @@ router.post("/updateUser", async (req, res) => {
 
         }
         
-        const { user } = req.body
-        const updatedUser = await User.findOneAndUpdate(user._id, user, { new: true })
-        if (updatedUser) {
-            return res.status(200).json({ userUpdated: true });
+        const { route } = req.body
+        const updatedRoute = await Route.findOneAndUpdate(route._id, route, { new: true })
+        if (updatedRoute) {
+            return res.status(200).json({ routeUpdated: true });
         } else {
-            return res.status(500).json({ userUpdated: false });
+            return res.status(500).json({ routeUpdated: false });
         }
-        // .then(function (err, doc) {
-        //     if (err) {
-        //         console.log("inside student.routes.js > saveStudent > error: ", err);
-        //         return res.status(500).json({ studentUpdated: false });
-        //     } else {
-        //         console.log("inside student.routes.js > saveStudent > all good:")
-        //         return res.status(200).json({ studentUpdated: true });
-        //     }
-        // });
 
     } catch (error) {
         console.log(error);

@@ -1,10 +1,10 @@
 const { Router } = require("express");
 const { check, validationResult } = require("express-validator");
 
-const User = require("../models/User")
+const Country = require("../models/Country")
 
 const router = Router()
-router.get("/getUsers",async(req,res)=>{
+router.get("/getCountries",async(req,res)=>{
 
     try {
         const errors = validationResult(req);
@@ -15,10 +15,10 @@ router.get("/getUsers",async(req,res)=>{
             });
 
         }
-        const allUsers = await User.find({});
+        const allCountries = await Country.find({});
         // const updatedOrder = await C.findByIdAndUpdate(order._id, order, { new: true });
         //console.log(updatedOrder);
-        return res.status(200).json(allUsers);
+        return res.status(200).json(allCountries);
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ error: error, message: error.message })
@@ -26,7 +26,7 @@ router.get("/getUsers",async(req,res)=>{
     }
   })
 
-  router.post("/getUser", async (req, res) => {
+  router.post("/getCountry", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -36,9 +36,11 @@ router.get("/getUsers",async(req,res)=>{
             });
 
         }
-        const { email } = req.body
-        const user = await User.findOne({ email });
-        return res.status(200).json(user);
+        const { id } = req.body
+        const country = await Country.findOne({ id });
+        const size = new TextEncoder().encode(JSON.stringify(country)).length
+        console.log("country from db size ", size)
+        return res.status(200).json(country);
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ error: error, message: error.message })
@@ -46,7 +48,7 @@ router.get("/getUsers",async(req,res)=>{
     }
 });
 
-router.post("/createUser", async (req, res) => {
+router.post("/createCountry", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -57,18 +59,20 @@ router.post("/createUser", async (req, res) => {
 
         }
         
-        const { user } = req.body
-        const createdUser = new User({ type_of_user: user.type_of_user, first_name: user.first_name, second_name: user.second_name, company_name: user.company_name, email: user.email, phone: user.phone, address: user.address, duns: user.duns});
-        await createdUser.save();
-        const size = new TextEncoder().encode(JSON.stringify(createdUser)).length
-        const size2 = Buffer.byteLength(JSON.stringify(createdUser))
-        console.log("User size: ", size)
-        console.log("User size 2: ", size2)
+        const { country } = req.body
+        const createdCountry = new Country({ name: country.name, city: country.city});
+        await createdCountry.save();
 
-        if (createdUser) {
-            return res.status(200).json({ createdUser });
+        //1 new city with 10 zipCodes is 117 bytes
+        //1 zip code in city is 5.53 bytes  
+        const size = new TextEncoder().encode(JSON.stringify(createdCountry)).length
+        const size2 = Buffer.byteLength(JSON.stringify(createdCountry))
+        console.log("created country size: ", size)
+        console.log("created country size 2 : ", size2)
+        if (createdCountry) {
+            return res.status(200).json({ createdCountry });
         } else {
-            return res.status(500).json({ createdUser }); // actually I dont know what sata type will be createdStudent if saving fails
+            return res.status(500).json({ createdCountry }); 
         }
     } catch (error) {
         console.log(error);
@@ -77,7 +81,7 @@ router.post("/createUser", async (req, res) => {
     }
 });
 
-router.post("/updateUser", async (req, res) => {
+router.post("/updateCountry", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -88,23 +92,15 @@ router.post("/updateUser", async (req, res) => {
 
         }
         
-        const { user } = req.body
-        const updatedUser = await User.findOneAndUpdate(user._id, user, { new: true })
-        if (updatedUser) {
-            return res.status(200).json({ userUpdated: true });
+        const { country } = req.body
+        console.log(req.body)
+        const updatedCountry = await Country.findOneAndUpdate(country._id, country, { new: true })
+        if (updatedCountry) {
+            return res.status(200).json({ countryUpdated: true });
         } else {
-            return res.status(500).json({ userUpdated: false });
+            return res.status(500).json({ countryUpdated: false });
         }
-        // .then(function (err, doc) {
-        //     if (err) {
-        //         console.log("inside student.routes.js > saveStudent > error: ", err);
-        //         return res.status(500).json({ studentUpdated: false });
-        //     } else {
-        //         console.log("inside student.routes.js > saveStudent > all good:")
-        //         return res.status(200).json({ studentUpdated: true });
-        //     }
-        // });
-
+       
     } catch (error) {
         console.log(error);
         return res.status(500).json({ error: error, message: error.message })

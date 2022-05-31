@@ -1,10 +1,10 @@
 const { Router } = require("express");
 const { check, validationResult } = require("express-validator");
 
-const User = require("../models/User")
+const Driver = require("../models/Driver")
 
 const router = Router()
-router.get("/getUsers",async(req,res)=>{
+router.get("/getDrivers",async(req,res)=>{
 
     try {
         const errors = validationResult(req);
@@ -15,10 +15,10 @@ router.get("/getUsers",async(req,res)=>{
             });
 
         }
-        const allUsers = await User.find({});
-        // const updatedOrder = await C.findByIdAndUpdate(order._id, order, { new: true });
-        //console.log(updatedOrder);
-        return res.status(200).json(allUsers);
+        const allDrivers = await Driver.find({});
+        console.log(allDrivers)
+        
+        return res.status(200).json(allDrivers);
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ error: error, message: error.message })
@@ -26,7 +26,7 @@ router.get("/getUsers",async(req,res)=>{
     }
   })
 
-  router.post("/getUser", async (req, res) => {
+  router.post("/getDriver", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -36,9 +36,9 @@ router.get("/getUsers",async(req,res)=>{
             });
 
         }
-        const { email } = req.body
-        const user = await User.findOne({ email });
-        return res.status(200).json(user);
+        const { id } = req.body
+        const driver = await Driver.findOne({ id });
+        return res.status(200).json(driver);
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ error: error, message: error.message })
@@ -46,7 +46,7 @@ router.get("/getUsers",async(req,res)=>{
     }
 });
 
-router.post("/createUser", async (req, res) => {
+router.post("/createDriver", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -57,18 +57,17 @@ router.post("/createUser", async (req, res) => {
 
         }
         
-        const { user } = req.body
-        const createdUser = new User({ type_of_user: user.type_of_user, first_name: user.first_name, second_name: user.second_name, company_name: user.company_name, email: user.email, phone: user.phone, address: user.address, duns: user.duns});
-        await createdUser.save();
-        const size = new TextEncoder().encode(JSON.stringify(createdUser)).length
-        const size2 = Buffer.byteLength(JSON.stringify(createdUser))
-        console.log("User size: ", size)
-        console.log("User size 2: ", size2)
-
-        if (createdUser) {
-            return res.status(200).json({ createdUser });
+        const { driver } = req.body
+        const createdDriver = new Driver({ first_name: driver.first_name, second_name: driver.second_name, email: driver.email, phone: driver.phone, free: driver.free});
+        await createdDriver.save();
+        const size = new TextEncoder().encode(JSON.stringify(createdDriver)).length
+        const size2 = Buffer.byteLength(JSON.stringify(createdDriver))
+        console.log("Driver size: ", size)
+        console.log("Driver size 2: ", size2)
+        if (createdDriver) {
+            return res.status(200).json({ createdDriver });
         } else {
-            return res.status(500).json({ createdUser }); // actually I dont know what sata type will be createdStudent if saving fails
+            return res.status(500).json({ createdDriver }); // actually I dont know what sata type will be createdStudent if saving fails
         }
     } catch (error) {
         console.log(error);
@@ -77,7 +76,7 @@ router.post("/createUser", async (req, res) => {
     }
 });
 
-router.post("/updateUser", async (req, res) => {
+router.post("/updateDriver", async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -88,12 +87,12 @@ router.post("/updateUser", async (req, res) => {
 
         }
         
-        const { user } = req.body
-        const updatedUser = await User.findOneAndUpdate(user._id, user, { new: true })
-        if (updatedUser) {
-            return res.status(200).json({ userUpdated: true });
+        const { driver } = req.body
+        const updatedDriver = await Driver.findOneAndUpdate(driver._id, driver, { new: true })
+        if (updatedDriver) {
+            return res.status(200).json({ driverUpdated: true });
         } else {
-            return res.status(500).json({ userUpdated: false });
+            return res.status(500).json({ driverUpdated: false });
         }
         // .then(function (err, doc) {
         //     if (err) {
