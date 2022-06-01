@@ -1,21 +1,12 @@
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` FUNCTION `calculateAmount`(
+CREATE FUNCTION `calculateAmount`(
 	idpackage int
 ) RETURNS float
     DETERMINISTIC
 BEGIN
-DECLARE check_package int;
-DECLARE amount_return float;
-declare width float;
-declare fragile tinyint;
-declare electronics tinyint;
-declare oddsized tinyint;
-declare height float;
-declare depth float;
-declare weight float;
-DECLARE weight_calc float;
-DECLARE volume_calc float;
-DECLARE volume float;
+DECLARE check_package int; DECLARE amount_return float; declare width float; declare fragile tinyint; 
+declare electronics tinyint; declare oddsized tinyint; declare height float; declare depth float;
+declare weight float; DECLARE weight_calc float; DECLARE volume_calc float; DECLARE volume float;
 SELECT 
 packages.weight,packages.height,packages.depth,packages.width,packages.fragile,packages.electronics,packages.oddsized 
 into weight,height,depth,width,fragile,electronics,oddsized 

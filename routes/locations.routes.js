@@ -80,32 +80,32 @@ router.post("/updateLocation",
     }
   })
 
-// router.delete("/deleteLocation", [
-//   check("Id", "Id id not provided").exists(),
-// ],
-//   async (req, res) => {
-//     try {
-//       const errors = validationResult(req);
-//       if (!errors.isEmpty()) {
-//         return res.status(400).json({
-//           errors: errors.array(),
-//           message: "Invalid data while deleting a Location",
-//         });
-//       }
+router.delete("/deleteLocation", [
+  check("Id", "Id id not provided").exists(),
+],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          errors: errors.array(),
+          message: "Invalid data while deleting a Location",
+        });
+      }
 
-//       var { id } = req.body
-//       const response = await Location.deleteLocation(id)
-//       return res.status(200).json({ response })
-//     } catch (error) {
-//       console.log(error);
-//       return res.status(500).json({
-//         message: "Invalid data",
-//         errors: [
-//           { value: error, msg: error.message },
-//         ],
-//       });
-//     }
+      var { id } = req.body
+      const response = await Location.deleteLocation(id)
+      return res.status(200).json({ response })
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({
+        message: "Invalid data",
+        errors: [
+          { value: error, msg: error.message },
+        ],
+      });
+    }
 
-//   })
+  })
 
 module.exports = router;

@@ -137,37 +137,36 @@ router.post("/updatePayment",
         }
     })
 
-// router.delete("deletePayment/:id", [
-//     check("paymentId", "Paymnet Id not provided").exists(),
-// ], async (req, res) => {
-//     try {
-//         const errors = validationResult(req);
-//         if (!errors.isEmpty()) {
-//             return res.status(400).json({
-//                 errors: errors.array(),
-//                 message: "Invalid data while deleting a Payment",
-//             });
-//         }
+router.delete("deletePayment/:id", [
+    check("paymentId", "Paymnet Id not provided").exists(),
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array(),
+                message: "Invalid data while deleting a Payment",
+            });
+        }
 
-//         var { paymentId } = req.body
-//         const response = await Driver.deleteDriver(paymentId)
-//         return res.status(200).json({ response })
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(500).json({
-//             message: "Invalid data",
-//             errors: [
-//                 { value: error, msg: error.message },
-//             ],
-//         });
-//     }
-// })
+        var { paymentId } = req.body
+        const response = await Driver.deleteDriver(paymentId)
+        return res.status(200).json({ response })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Invalid data",
+            errors: [
+                { value: error, msg: error.message },
+            ],
+        });
+    }
+})
 
-// router.get("/", async (req, res) => {
-//     const response = await Payment.getAllPayments()
-//     // console.log(await Delivery.updateDeliveries(1,true,1,true,1,1,"","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","D332CD90-8A43"))
-//     return res.json({ response });
-// })
+router.get("/", async (req, res) => {
+    const response = await Payment.getAllPayments()
+    return res.json({ response });
+})
 
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
 const { execute } = require("../database/mysql.connector.js");
 const { characterGenerator } = require("../utility/utility.generators");
+const {getDateInSqlFormat } = require("../utility/utility.functions");
 class Delivery {
     iddeliveries;
     packages_idpackages;
@@ -23,10 +24,10 @@ class Delivery {
         start_location = Number,
         end_location = Number,
         message = String,
-        estimated_date = DATETIME,
-        start_date = DATETIME,
+        estimated_date = null,
+        start_date = null,
         end_date = null,
-        uid = String,
+        uid = null
     ) {
         this.iddeliveries = iddeliveries;
         this.packages_idpackages = packages_idpackages;
@@ -39,7 +40,9 @@ class Delivery {
         this.estimated_date = estimated_date;
         this.start_date = start_date;
         this.end_date = end_date;
-        this.uid = uid;
+        (uid == null || uid == undefined || typeof uid == 'undefined'
+            ? this.uid = this.generateUUID()
+            : this.uid = uid);
     }
     /**
     * Getters and Setters for the private fields
@@ -85,35 +88,13 @@ class Delivery {
     getStartDate() { return this.start_date }
     setStartDate(value) { this.start_date = value }
     getStartDateInSqlFormat() {
-        const year = this.start_date.getFullYear()
-        const month = ((this.start_date.getMonth() + 1) >= 10) ? `${this.start_date.getMonth() + 1}` : `0${this.start_date.getMonth() + 1}`
-        const date = (this.start_date.getDate() >= 10) ? `${this.start_date.getDate()}` : `0${this.start_date.getDate()}`
-        const hours = (this.start_date.getHours() >= 10) ? `${this.start_date.getHours()}` : `0${this.start_date.getHours()}`
-        const minutes = (this.start_date.getMinutes() >= 10) ? `${this.start_date.getMinutes()}` : `0${this.start_date.getMinutes()}`
-        const seconds = (this.start_date.getSeconds() >= 10) ? `${this.start_date.getSeconds()}` : `0${this.start_date.getSeconds()}`
-        // Date format that Mysql expects to receive: YYYY-MM-DD HH:MI:SS 
-        const res = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`
-        console.log("getStartDateInSqlFormat: ", res)
-        return res
+        return getDateInSqlFormat(this.start_date);
     }
 
     getEndDate() { return this.end_date }
     setEndDate(value) { this.end_date = value }
     getEndDateInSqlFormat() {
-        if (this.end_date != undefined || this.end_date != null) {
-            const year = this.end_date.getFullYear()
-            const month = ((this.end_date.getMonth() + 1) >= 10) ? `${this.end_date.getMonth() + 1}` : `0${this.end_date.getMonth() + 1}`
-            const date = (this.end_date.getDate() >= 10) ? `${this.end_date.getDate()}` : `0${this.end_date.getDate()}`
-            const hours = (this.end_date.getHours() >= 10) ? `${this.end_date.getHours()}` : `0${this.end_date.getHours()}`
-            const minutes = (this.end_date.getMinutes() >= 10) ? `${this.end_date.getMinutes()}` : `0${this.end_date.getMinutes()}`
-            const seconds = (this.end_date.getSeconds() >= 10) ? `${this.end_date.getSeconds()}` : `0${this.end_date.getSeconds()}`
-            // Date format that Mysql expects to receive: YYYY-MM-DD HH:MI:SS 
-            const res = `${year}-${month}-${date} ${hours}:${minutes}:${seconds}`
-            console.log("getEndDateInSqlFormat: ", res)
-            return res
-        } else {
-            return null
-        }
+        return getDateInSqlFormat(this.end_date);
     }
 
     getUID() { return this.uid }
@@ -203,6 +184,23 @@ class Delivery {
                 response[0].start_date,
                 response[0].end_date,
                 response[0].uid)
+        } catch (error) {
+            console.log("[mysql.connector][execute][Error]: ", error);
+            throw {
+                value: "Query failed",
+                message: error.message,
+            }
+        }
+
+    }
+
+    static async getEstimatedDateFromDB(start_location, end_location, start_date) {
+        try {
+            const dateForSQL = getDateInSqlFormat(start_date)
+            console.log("dateForSQL", dateForSQL)
+            const response = await execute("SELECT get_estimated_date(?,?,?) AS estimated_date;", [start_location, end_location, dateForSQL])
+            return response[0].estimated_date;
+
         } catch (error) {
             console.log("[mysql.connector][execute][Error]: ", error);
             throw {
@@ -310,19 +308,20 @@ class Delivery {
         newDelivery = Delivery
     ) {
         try {
-            const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
-                + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
-                [newDelivery.getPackageId(),
-                newDelivery.getPriority(),
-                newDelivery.getPaymentId(),
-                newDelivery.getInternational(),
-                newDelivery.getStartLocation(),
-                newDelivery.getEndLocation(),
-                newDelivery.getMessage(),
-                newDelivery.getEstimatedDate(),
-                newDelivery.getStartDate(),
-                newDelivery.getEndDate(),
-                generateUUID()])
+            // const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
+            // + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
+            // [newDelivery.getPackageId(),
+            // newDelivery.getPriority(),
+            // newDelivery.getPaymentId(),
+            // newDelivery.getInternational(),
+            // newDelivery.getStartLocation(),
+            // newDelivery.getEndLocation(),
+            // newDelivery.getMessage(),
+            // newDelivery.getEstimatedDate(),
+            // newDelivery.getStartDate(),
+            // newDelivery.getEndDate(),
+            // newDelivery.getUID()])
+            console.log("newDelivery: ", newDelivery)
             console.log("createDelivery response: ", response)
             if (response.affectedRows > 0) {
                 newDelivery.setIdDeliveries(response.insertId);

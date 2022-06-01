@@ -86,7 +86,6 @@ router.post("/updateRoute", async (req, res) => {
 router.get("/", async (req, res) => {
     const response = await Route.getAllRoutes()
     const resp = response[0].toString() 
-    // console.log(await Delivery.updateDeliveries(1,true,1,true,1,1,"","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","D332CD90-8A43"))
     return res.json({ resp });
 })
 

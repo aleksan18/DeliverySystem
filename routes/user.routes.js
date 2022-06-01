@@ -46,16 +46,16 @@ router.post("/register",
                     message: "Invalid data while creating a user",
                 });
             }
-            const { typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city,password,confirmPassword} = req.body;
-            
-            if(password !== confirmPassword){
+            const { typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city, password, confirmPassword } = req.body;
+
+            if (password !== confirmPassword) {
                 return res.status(400).json({
-                  message: "Confirm password is not correct",
-                  errors: [{ value: "confirmPassword", msg: "Confirm password is not correct", param: "confirmPassword" }],
+                    message: "Confirm password is not correct",
+                    errors: [{ value: "confirmPassword", msg: "Confirm password is not correct", param: "confirmPassword" }],
                 });
-              }
+            }
             const hashedPassword = await bcrypt.hash(password, 12);
-            const user = new User(null, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city,hashedPassword);
+            const user = new User(null, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city, hashedPassword);
             console.log(user)
             const { userCreated, createdUser } = await User.createUser(user)
             if (userCreated) {
@@ -73,7 +73,7 @@ router.post("/register",
             });
         }
     })
-router.post("/updateUser",  [
+router.post("/updateUser", [
     check("idCustomer").exists({ checkFalsy: true }).withMessage("Customer not provided").trim()
         .toInt().isInt({ min: 0 }).withMessage("Wrong value provided"),
     check("typeOfUser").exists({ checkFalsy: true }).withMessage("Type of user not provided").trim().toInt()
@@ -111,8 +111,8 @@ router.post("/updateUser",  [
                 message: "Invalid data while creating a user",
             });
         }
-        const { idCustomer, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city,password} = req.body;
-        const user = new User(idCustomer, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city,password);
+        const { idCustomer, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city, password } = req.body;
+        const user = new User(idCustomer, typeOfUser, firstName, secondName, companyName, email, phone, address, duns, zipcode, city, password);
         console.log(user);
         const { userInfoIsSame, updatedUser } = await User.updateUser(user)
         if (!userInfoIsSame && typeof updatedUser === 'object') {
@@ -135,52 +135,80 @@ router.post("/updateUser",  [
 })
 router.post("/login", async (req, res) => {
     try {
-        
+
         const errors = validationResult(req);
 
         if (!errors.isEmpty()) {
-          return res.status(400).json({
-            errors: errors.array(),
-            message: "Invalid authorization data",
-          });
+            return res.status(400).json({
+                errors: errors.array(),
+                message: "Invalid authorization data",
+            });
         }
-  
+
         const { email, password } = req.body;
         const user = await User.getUserByEmail(email)
         console.log(user);
         if (!user) {
             return res.status(400).json({
-              message: "Invalid authorization data",
-              errors: [{ value: email, msg: "User not found", param: "email" }],
+                message: "Invalid authorization data",
+                errors: [{ value: email, msg: "User not found", param: "email" }],
             });
-          }
-        
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({
-              message: "Invalid authorization data",
-              errors: [
-                { value: "", msg: "Wrong password, try again", param: "password" },
-              ],
+                message: "Invalid authorization data",
+                errors: [
+                    { value: "", msg: "Wrong password, try again", param: "password" },
+                ],
             });
         }
 
         const token = jwt.sign({ id: user.idcustomer }, process.env.JWT_SECRET, {
             expiresIn: "30m",
-          });
-        return res.status(200).json({ user,token:token,exp:token.exp });
+        });
+        return res.status(200).json({ user, token: token, exp: token.exp });
 
     } catch (error) {
         console.log(error.value);
         return res.status(500).json({
-          message: "Invalid data",
-          errors: [
-            { value: error.value, msg: error.message },
-          ],
+            message: "Invalid data",
+            errors: [
+                { value: error.value, msg: error.message },
+            ],
         });
     }
-   
+
 })
+
+router.delete("/deleteUser", [
+    check("Id", "User id not provided").exists(),
+],
+    async (req, res) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    errors: errors.array(),
+                    message: "Invalid data while deleting a user",
+                });
+            }
+
+            var { id } = req.body
+            const response = await User.deleteUser(id)
+            return res.status(200).json({ response })
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                message: "Invalid data",
+                errors: [
+                    { value: error, msg: error.message },
+                ],
+            });
+        }
+    })
+
 router.post("/getUser", async (req, res) => {
 
     const user = await User.getUser(43);
@@ -189,40 +217,13 @@ router.post("/getUser", async (req, res) => {
     console.log(users);
     return res.status(200).json({ user });
 })
+
 router.get("/getUsers", async (req, res) => {
 
     const users = await User.getAllUsers();
     console.log(users);
     return res.status(200).json({ users });
 })
-
-// router.delete("/deleteUser",[
-//   check("Id","User id not provided").exists(),
-// ], 
-// async(req, res)=>{
-//   try {
-//       const errors =validationResult(req);
-//       if (!errors.isEmpty()) {
-//           return res.status(400).json({
-//             errors: errors.array(),
-//             message: "Invalid data while deleting a user",
-//           });
-//        }
-
-//        var {id} = req.body
-//        const response = await User.deleteUser(id)
-//        return res.status(200).json({response})
-//     } catch (error) {
-//       console.log(error);
-//       return res.status(500).json({
-//       message: "Invalid data",
-//       errors: [
-//           { value: error, msg: error.message },
-//       ],
-//   });
-//   }
-
-// })
 
 module.exports = router;
 
