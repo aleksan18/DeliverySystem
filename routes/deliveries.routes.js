@@ -22,8 +22,6 @@ router.post("/addDelivery",
         check("message").optional().exists().withMessage("Message not provided").trim()
             .isLength({ max: 150 }).withMessage("Message should be no more than 150 characters long"),
         check("start_date").exists({ checkFalsy: true }).withMessage("Start date not provided").trim()
-            .isDate({ format: "YYYY-MM-DD hh:mm:ss" }).withMessage("Date has wrong format (should be 'YYYY-MM-DD hh:mm:ss')")
-            .isAfter().withMessage("Date selected can't be today's date.")
             .toDate().withMessage("Value provided is not a date")
 
     ], async (req, res) => {
@@ -47,6 +45,9 @@ router.post("/addDelivery",
                 start_date
             } = req.body;
             // console.log(await Delivery.updateDeliveries(1,true,1,true,1,1,"","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","D332CD90-8A43"))
+            
+           const estimated_date = await Delivery.getEstimatedDateFromDB(start_location, end_location, start_date);
+
             const newDelivery = new Delivery(
                 null,
                 packages_idpackages,
@@ -56,12 +57,12 @@ router.post("/addDelivery",
                 start_location,
                 end_location,
                 message,
+                estimated_date,
                 start_date,
-                null,
                 null
             )
 
-            // console.log("newDelivery inside addDelivery", newDelivery.toString())
+            console.log("newDelivery inside addDelivery", newDelivery)
             const { deliveryCreated, createdDelivery } = await Delivery.createDelivery(newDelivery);
             // example of what Delivery.createDelivery() should return 
             // OkPacket {
@@ -187,6 +188,31 @@ router.post("/updateDelivery",
         }
     })
 
+router.delete("deleteDelivery/:id", [
+    check("deliveryId", "Id of delivery not provided").exists(),
+], async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                errors: errors.array(),
+                message: "Invalid data while deleting a Delivery",
+            });
+        }
+
+        const { deliveryId } = req.body
+        const response = await Driver.deleteDriver(deliveryId)
+        return res.status(200).json({ response })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Invalid data",
+            errors: [
+                { value: error, msg: error.message },
+            ],
+        });
+    }
+})
 
 // router.post("/addWholeDelivery", async (req, res) => {
 //     console.log("req.body in /addWholeDelivery ", req.body)
@@ -300,33 +326,5 @@ router.post("/updateDelivery",
 //     return res.json({ response: packageResponse });
 // })
 
-// router.delete("deleteDelivery/:id", [
-//     check("deliveryId", "Id of delivery not provided").exists(),
-// ], async (req, res) => {
-//     try {
-//         const errors = validationResult(req);
-//         if (!errors.isEmpty()) {
-//             return res.status(400).json({
-//                 errors: errors.array(),
-//                 message: "Invalid data while deleting a Delivery",
-//             });
-//         }
-
-//         const { deliveryId } = req.body
-//         const response = await Driver.deleteDriver(deliveryId)
-//         return res.status(200).json({ response })
-//     } catch (error) {
-//         console.log(error);
-//         return res.status(500).json({
-//             message: "Invalid data",
-//             errors: [
-//                 { value: error, msg: error.message },
-//             ],
-//         });
-//     }
-// })
 
 module.exports = router;
-
-
-// select get_estimated_date(1,15,'2021-07-19 03:30:07') as estimated_date
