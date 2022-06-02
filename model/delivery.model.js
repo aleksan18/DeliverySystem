@@ -199,7 +199,9 @@ class Delivery {
             const dateForSQL = getDateInSqlFormat(start_date)
             console.log("dateForSQL", dateForSQL)
             const response = await execute("SELECT get_estimated_date(?,?,?) AS estimated_date;", [start_location, end_location, dateForSQL])
-            return response[0].estimated_date;
+            console.log(response[0].estimated_date);
+            console.log(response[0].estimated_date.toString());
+            return start_date;
 
         } catch (error) {
             console.log("[mysql.connector][execute][Error]: ", error);
@@ -308,19 +310,19 @@ class Delivery {
         newDelivery = Delivery
     ) {
         try {
-            // const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
-            // + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
-            // [newDelivery.getPackageId(),
-            // newDelivery.getPriority(),
-            // newDelivery.getPaymentId(),
-            // newDelivery.getInternational(),
-            // newDelivery.getStartLocation(),
-            // newDelivery.getEndLocation(),
-            // newDelivery.getMessage(),
-            // newDelivery.getEstimatedDate(),
-            // newDelivery.getStartDate(),
-            // newDelivery.getEndDate(),
-            // newDelivery.getUID()])
+            const response = await execute("INSERT INTO deliveries(packages_idpackages,priority,payment_idpayment,international,start_location,end_location,message,estimated_date,start_date,end_date,uid) "
+            + "VALUES (?,?,?,?,?,?,?,?,?,?,?);",
+            [newDelivery.getPackageId(),
+            newDelivery.getPriority(),
+            newDelivery.getPaymentId(),
+            newDelivery.getInternational(),
+            newDelivery.getStartLocation(),
+            newDelivery.getEndLocation(),
+            newDelivery.getMessage(),
+            newDelivery.getEstimatedDate(),
+            newDelivery.getStartDate(),
+            newDelivery.getEndDate(),
+            newDelivery.getUID()])
             console.log("newDelivery: ", newDelivery)
             console.log("createDelivery response: ", response)
             if (response.affectedRows > 0) {

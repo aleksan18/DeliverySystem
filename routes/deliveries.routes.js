@@ -45,7 +45,7 @@ router.post("/addDelivery",
                 start_date
             } = req.body;
             // console.log(await Delivery.updateDeliveries(1,true,1,true,1,1,"","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","2021-07-19T01:30:07.000Z","D332CD90-8A43"))
-            
+            console.log("start_date: ", start_date.getMonth())
            const estimated_date = await Delivery.getEstimatedDateFromDB(start_location, end_location, start_date);
 
             const newDelivery = new Delivery(
