@@ -3,7 +3,7 @@ const { execute } = require("../database/mysql.connector.js");
 const getDateInSqlFormat = (date) => {
     console.log("date: ", date)
     console.log("typeof date: ", typeof date)
-    if (date != undefined || date != null) {
+    if (date instanceof Date && !isNaN(x)) {
         const year = date.getFullYear()
         const month = ((date.getMonth() + 1) >= 10) ? `${date.getMonth() + 1}` : `0${date.getMonth() + 1}`
         const day = (date.getDate() >= 10) ? `${date.getDate()}` : `0${date.getDate()}`

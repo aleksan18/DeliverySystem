@@ -1,5 +1,5 @@
 const { DATETIME, DATETIME2 } = require("mysql/lib/protocol/constants/types");
-const { execute } = require("../database/mysql.connector.js");
+const { execute } = require("../mysql/database/mysql.connector.js");
 
 class Package {
     idpackages;

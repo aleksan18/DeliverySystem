@@ -9,7 +9,7 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 
-const { init } = require("./database/mysql.connector");
+const { init } = require("./mysql/database/mysql.connector");
 const app = express();
 const {startMongo} = require("./mongo/database/mongo.connection")
 app.use(express.json({ limit: "30mb", extended: true }));
@@ -21,14 +21,13 @@ app.use("/mongodb/deliveries",require("./mongo/routes/delivery.routes"))
 app.use("/mongodb/drivers",require("./mongo/routes/driver.routes"))
 app.use("/mongodb/vehicles",require("./mongo/routes/vehicle.routes"))
 app.use("/mongodb/routes",require("./mongo/routes/route.routes"))
-app.use("/users",require("./routes/user.routes"));
-app.use("/general",require("./routes/general.routes"));
-app.use("/deliveries",require("./routes/deliveries.routes"));
-app.use("/packages",require("./routes/packages.routes"));
-app.use("/payments",require("./routes/payments.routes"));
-app.use("/locations",require("./routes/locations.routes"));
-app.use("/routes",require("./routes/routes.routes"));
-
+app.use("/mysql/users",require("./mysql/routes/user.routes"));
+app.use("/mysql/general",require("./mysql/routes/general.routes"));
+app.use("/mysql/deliveries",require("./mysql/routes/deliveries.routes"));
+app.use("/mysql/packages",require("./mysql/routes/packages.routes"));
+app.use("/mysql/payments",require("./mysql/routes/payments.routes"));
+app.use("/mysql/locations",require("./mysql/routes/locations.routes"));
+app.use("/mysql/routes",require("./mysql/routes/routes.routes"));
 app.use('/neo4j/users', userRoutes);
 app.use('/neo4j/delivery', deliveryRoutes)
 app.use('/neo4j/npackage', packageRoutes)
@@ -36,14 +35,6 @@ app.use('/neo4j/route', routeRoutes)
 app.use('/neo4j/location', locationRoutes)
 app.use('/neo4j/driver', driverRouters)
 app.use('/neo4j/vehicle', vehicleRoutes)
-
-if (process.env.NODE_ENV === "production") {
-  app.use("/", express.static(path.join(__dirname, "client", "build")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-  });
-}
 
 const PORT = process.env.PORT || 5000;
 
