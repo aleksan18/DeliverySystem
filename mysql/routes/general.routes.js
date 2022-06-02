@@ -2,7 +2,7 @@ const { Router } = require("express");
 const router = Router();
 const { check, validationResult } = require("express-validator");
 const req = require("express/lib/request");
-const { executeTransaction } = require("../mysql/database/mysql.connector")
+const { executeTransaction } = require("../database/mysql.connector")
 const { Driver } = require("../model/driver.model");
 const { Vehicle } = require("../model/vehicle.model")
 

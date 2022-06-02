@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const router = Router();
 const { check, validationResult } = require("express-validator")
-const { execute } = require("../mysql/database/mysql.connector")
+const { execute } = require("../database/mysql.connector")
 const { User } = require("../model/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");

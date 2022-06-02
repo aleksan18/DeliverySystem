@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const router = Router();
-const { execute } = require("../mysql/database/mysql.connector")
+const { execute } = require("../database/mysql.connector")
 const { Package } = require("../model/package.model")
 const { check, validationResult } = require("express-validator")
 
