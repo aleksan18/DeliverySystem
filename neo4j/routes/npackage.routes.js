@@ -1,8 +1,7 @@
-import express from "express";
-import session from "../database.driver.js"
+const { Router } = require("express");
+const session = require("../neo4jdatabase.driver");
 
-const router = express.Router(); //Initialize the Router
-
+const router = Router();
 //all routes here are starting with /package
 
 //READ
@@ -82,5 +81,4 @@ router.delete('/', function(req,res){
     })
 })
 
-
-export default router;
+module.exports = router;

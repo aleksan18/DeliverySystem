@@ -1,3 +1,3 @@
-export const uri = 'neo4j+s://c5ba1e1d.databases.neo4j.io:7687';
-export const user = 'neo4j';
-export const password = '58CgSPWZTQFZbWYkhWPrgOJJZv69OF2Y3wIXozTG22g';
+export const uri = process.env.NEO4J_URI;
+export const user = process.env.neo4j;
+export const password = process.env.NEO4J_PASSWORD;

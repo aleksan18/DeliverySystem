@@ -14,6 +14,5 @@ async function startMongo() {
     // });
   return db
   }
-  startMongo()
   module.exports = {startMongo}
   
