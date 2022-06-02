@@ -2,7 +2,7 @@
 * generates pool connection to be used throughout the app
 */
 require("dotenv").config();
-const { createPool, createConnection } = require("mysql");
+const { createPool } = require("mysql");
 
 let pool
 /**
@@ -73,8 +73,8 @@ return returnValue;
    *                              provided queries.
    */
 const executeTransaction = (
-  queries = Array(String),
-  params = Array(Array),
+  queries,
+  params,
 ) => {
   try {  
     if (!pool){
@@ -132,8 +132,8 @@ const executeTransaction = (
  * 
  */
 const execute = (
-  query = String,
-  params = Array(String) | object,
+  query,
+  params,
 ) => {
   try {
     if (!pool)

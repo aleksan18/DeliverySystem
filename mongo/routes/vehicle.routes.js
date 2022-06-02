@@ -1,5 +1,4 @@
 const { Router } = require("express");
-const { check, validationResult } = require("express-validator");
 
 const Vehicle = require("../models/Vehicle")
 
@@ -7,14 +6,6 @@ const router = Router()
 router.get("/getVehicles",async(req,res)=>{
 
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-                message: "Invalid data while sending",
-            });
-
-        }
         const allVehicles = await Vehicle.find({});
         // const updatedOrder = await C.findByIdAndUpdate(order._id, order, { new: true });
         //console.log(updatedOrder);

@@ -1,4 +1,4 @@
-const { Schema, model, Types, Mongoose } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 
 const routeSchema = new Schema(
     {

@@ -201,7 +201,7 @@ router.delete("deleteDelivery/:id", [
         }
 
         const { deliveryId } = req.body
-        const response = await Driver.deleteDriver(deliveryId)
+        const response = await Delivery.deleteDelivery(deliveryId)
         return res.status(200).json({ response })
     } catch (error) {
         console.log(error);
