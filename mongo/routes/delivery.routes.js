@@ -1,5 +1,4 @@
 const { Router } = require("express");
-const { check, validationResult } = require("express-validator");
 const  mongoose  = require("mongoose")
 const Delivery = require("../models/Delivery")
 const User = require("../models/User")
@@ -8,14 +7,6 @@ const router = Router()
 router.get("/getDeliveries",async(req,res)=>{
 
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-                message: "Invalid data while sending",
-            });
-
-        }
         const allDeliveries = await Delivery.find({});
         // const updatedOrder = await C.findByIdAndUpdate(order._id, order, { new: true });
         //console.log(updatedOrder);

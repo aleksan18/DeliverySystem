@@ -28,7 +28,11 @@ const numberGenerator = (length,previousNumber="")=>{
  * @returns {String}  Returns a string if the `dateToCheck` is below 10 then the string starts with a 0 if not the `dateToCheck` is returned.
  */
 const sizeCheck = (dateToCheck) =>{
-    if(dateToCheck<10){return "0"+dateToCheck;}else{return dateToCheck};
+    if(dateToCheck < 10){
+        return "0" + dateToCheck;
+    }else{
+        return dateToCheck;
+    }
 }
 /**
  * 

@@ -7,7 +7,7 @@ async function startMongo() {
       });
       console.log("Connected to Mongo");
     mongoose.connection.on('error', err => {
-      logError(err);
+      console.log("error", err);
     });
     // mongoose.connection.on('disconnected', err => {
     //   logError(err);

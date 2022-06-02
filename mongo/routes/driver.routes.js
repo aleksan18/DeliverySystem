@@ -1,5 +1,4 @@
 const { Router } = require("express");
-const { check, validationResult } = require("express-validator");
 
 const Driver = require("../models/Driver")
 
@@ -7,14 +6,6 @@ const router = Router()
 router.get("/getDrivers",async(req,res)=>{
 
     try {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({
-                errors: errors.array(),
-                message: "Invalid data while sending",
-            });
-
-        }
         const allDrivers = await Driver.find({});
         console.log(allDrivers)
         

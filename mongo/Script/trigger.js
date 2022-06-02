@@ -1,6 +1,5 @@
 exports = async function (changeEvent) {
 
-    const routesCollection = context.services.get("Cluster0").db("Delivery_sistem").collection("Routes");
     const deliveriesCollection = context.services.get("Cluster0").db("Delivery_sistem").collection("Deliveries");
 
     // console.log(JSON.stringify(changeEvent.fullDocument))

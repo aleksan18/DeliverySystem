@@ -150,7 +150,7 @@ router.delete("deletePayment/:id", [
         }
 
         var { paymentId } = req.body
-        const response = await Driver.deleteDriver(paymentId)
+        const response = await Payment.deletePayment(paymentId)
         return res.status(200).json({ response })
     } catch (error) {
         console.log(error);

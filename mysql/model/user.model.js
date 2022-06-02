@@ -225,17 +225,17 @@ class User {
                 const response = await execute(
                     "UPDATE user "
                     + "SET type_of_user=?,firstname=?,secondname=?,companyname=?,email=?,phone=?,address=?,duns=?,zip_city_zipcode_idzipcode=?,zip_city_city_idcity=? WHERE idcustomer=?;"
-                    , [newUser.getTypeOfUser(),
-                    newUser.getFirstName(),
-                    newUser.getSecondName(),
-                    newUser.getCompanyName(),
-                    newUser.getEmail(),
-                    newUser.getPhone(),
-                    newUser.getAddress(),
-                    newUser.getDuns(),
-                    newUser.getZipCode(),
-                    newUser.getCity(),
-                    newUser.getIdCustomer()]);
+                    , [updatedUser.getTypeOfUser(),
+                    updatedUser.getFirstName(),
+                    updatedUser.getSecondName(),
+                    updatedUser.getCompanyName(),
+                    updatedUser.getEmail(),
+                    updatedUser.getPhone(),
+                    updatedUser.getAddress(),
+                    updatedUser.getDuns(),
+                    updatedUser.getZipCode(),
+                    updatedUser.getCity(),
+                    updatedUser.getIdCustomer()]);
                 if (response.changedRows > 0) {
                     return { userInfoIsSame: false, updatedUser }
                 } else {
