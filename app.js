@@ -1,10 +1,3 @@
-import userRoutes from './neo4j/routes/users.routes.js';
-import deliveryRoutes from './neo4j/routes/delivery.routes.js'
-import packageRoutes from './neo4j/routes/npackage.routes.js'
-import routeRoutes from './neo4j/routes/route.routes.js'
-import locationRoutes from './neo4j/routes/location.routes.js'
-import driverRouters from './neo4j/routes/driver.routes.js'
-import vehicleRoutes from './neo4j/routes/vehicle.routes.js'
 require("dotenv").config();
 const express = require("express");
 const path = require("path");
@@ -28,13 +21,13 @@ app.use("/mysql/packages",require("./mysql/routes/packages.routes"));
 app.use("/mysql/payments",require("./mysql/routes/payments.routes"));
 app.use("/mysql/locations",require("./mysql/routes/locations.routes"));
 app.use("/mysql/routes",require("./mysql/routes/routes.routes"));
-app.use('/neo4j/users', userRoutes);
-app.use('/neo4j/delivery', deliveryRoutes)
-app.use('/neo4j/npackage', packageRoutes)
-app.use('/neo4j/route', routeRoutes)
-app.use('/neo4j/location', locationRoutes)
-app.use('/neo4j/driver', driverRouters)
-app.use('/neo4j/vehicle', vehicleRoutes)
+app.use('/neo4j/users', require("./neo4j/routes/users.routes.js"));
+app.use('/neo4j/delivery',  require("./neo4j/routes/delivery.routes.js"))
+app.use('/neo4j/npackage', require("./neo4j/routes/npackage.routes.js"))
+app.use('/neo4j/route', require("./neo4j/routes/route.routes.js"))
+app.use('/neo4j/location', require("./neo4j/routes/location.routes.js"))
+app.use('/neo4j/driver', require("./neo4j/routes/driver.routes.js"))
+app.use('/neo4j/vehicle', require("./neo4j/routes/vehicle.routes.js"))
 
 const PORT = process.env.PORT || 5000;
 
