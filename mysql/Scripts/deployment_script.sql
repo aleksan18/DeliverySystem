@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `postnord`.`user` (
   `duns` VARCHAR(9) NULL,
   `zip_city_zipcode_idzipcode` INT NOT NULL,
   `zip_city_city_idcity` INT NOT NULL,
-  `password` VARCHAR(15) NOT NULL,
+  `password` VARCHAR(60) NOT NULL,
   PRIMARY KEY (`idcustomer`),
   INDEX `fk_customer_typeofreceiver_customer1_idx` (`type_of_user` ASC) VISIBLE,
   UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
@@ -178,6 +178,30 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `postnord`.`payment`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `postnord`.`payment` ;
+
+CREATE TABLE IF NOT EXISTS `postnord`.`payment` (
+  `idpayment` INT NOT NULL AUTO_INCREMENT,
+  `typeofpayment_idtypeofpayment` INT NOT NULL,
+  `amount` DECIMAL(6,2) NOT NULL,
+  `payed` TINYINT NOT NULL,
+  `prepaid` TINYINT NOT NULL,
+  `transactionid` VARCHAR(20) NULL,
+  `billing_address` VARCHAR(70) NOT NULL,
+  PRIMARY KEY (`idpayment`),
+  INDEX `fk_payment_typeofpayment1_idx` (`typeofpayment_idtypeofpayment` ASC) VISIBLE,
+  UNIQUE INDEX `transactionid_UNIQUE` (`transactionid` ASC) VISIBLE,
+  CONSTRAINT `fk_payment_typeofpayment1`
+    FOREIGN KEY (`typeofpayment_idtypeofpayment`)
+    REFERENCES `postnord`.`typeofpayment` (`idtypeofpayment`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `postnord`.`typeoflocation`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `postnord`.`typeoflocation` ;
@@ -218,36 +242,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `postnord`.`payment`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `postnord`.`payment` ;
-
-CREATE TABLE IF NOT EXISTS `postnord`.`payment` (
-  `idpayment` INT NOT NULL AUTO_INCREMENT,
-  `typeofpayment_idtypeofpayment` INT NOT NULL,
-  `amount` DECIMAL(6,2) NOT NULL,
-  `payed` TINYINT NOT NULL,
-  `prepaid` TINYINT NOT NULL,
-  `transactionid` VARCHAR(20),
-  `billing_address` INT,
-  PRIMARY KEY (`idpayment`),
-  INDEX `fk_payment_typeofpayment1_idx` (`typeofpayment_idtypeofpayment` ASC) VISIBLE,
-  UNIQUE INDEX `transactionid_UNIQUE` (`transactionid` ASC) VISIBLE,
-  INDEX `fk_payment_location1_idx` (`billing_address` ASC) VISIBLE,
-  CONSTRAINT `fk_payment_typeofpayment1`
-    FOREIGN KEY (`typeofpayment_idtypeofpayment`)
-    REFERENCES `postnord`.`typeofpayment` (`idtypeofpayment`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_payment_location1`
-    FOREIGN KEY (`billing_address`)
-    REFERENCES `postnord`.`location` (`idlocation`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `postnord`.`deliveries`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `postnord`.`deliveries` ;
@@ -263,7 +257,7 @@ CREATE TABLE IF NOT EXISTS `postnord`.`deliveries` (
   `message` VARCHAR(150) NOT NULL,
   `estimated_date` DATETIME NOT NULL,
   `start_date` DATETIME NOT NULL,
-  `end_date` DATETIME,
+  `end_date` DATETIME NULL,
   `uid` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`iddeliveries`),
   INDEX `fk_deliveries_packages1_idx` (`packages_idpackages` ASC) VISIBLE,
@@ -373,7 +367,7 @@ CREATE TABLE IF NOT EXISTS `postnord`.`routes` (
   `deliveries_iddeliveries` INT NOT NULL,
   `route_order` INT NOT NULL,
   `start_date` DATETIME NOT NULL,
-  `end_date` DATETIME NOT NULL,
+  `end_date` DATETIME NULL,
   PRIMARY KEY (`idroutes`),
   INDEX `fk_routes_vehicles1_idx` (`vehicles_idvehicles` ASC) VISIBLE,
   INDEX `fk_routes_employees1_idx` (`employees_idemployees` ASC) VISIBLE,
@@ -413,6 +407,136 @@ CREATE TABLE IF NOT EXISTS `postnord`.`routes` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `postnord`.`audit_table`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `postnord`.`audit_table` ;
+
+CREATE TABLE IF NOT EXISTS `postnord`.`audit_table` (
+  `idrow` INT NOT NULL,
+  `action_type` ENUM("INSERT", "UPDATE", "DELETE") NOT NULL,
+  `action_date` DATETIME NOT NULL,
+  `action_created_by` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`idrow`, `action_date`, `action_type`))
+ENGINE = InnoDB;
+
+USE `postnord`;
+
+DELIMITER $$
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_INSERT` AFTER INSERT ON `user` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idcustomer,"INSERT",now(),USER(),"USER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_UPDATE` AFTER UPDATE ON `user` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idcustomer,"UPDATE",now(),USER(),"USER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_DELETE` AFTER DELETE ON `user` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idcustomer,"DELETE",now(),USER(),"USER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_INSERT` AFTER INSERT ON `payment` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idpayment,"INSERT",now(),USER()," PAYMENT TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_UPDATE` AFTER UPDATE ON `payment` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idpayment,"UPDATE",now(),USER()," PAYMENT TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_DELETE` AFTER DELETE ON `payment` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idpayment,"DELETE",now(),USER()," PAYMENT TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_INSERT` AFTER INSERT ON `vehicles` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idvehicles,"INSERT",now(),USER(),"VEHICLES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_UPDATE` AFTER UPDATE ON `vehicles` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idvehicles,"UPDATE",now(),USER(),"VEHICLES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_DELETE` AFTER DELETE ON `vehicles` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idvehicles,"DELETE",now(),USER(),"VEHICLES TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_INSERT` AFTER INSERT ON `routes` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idroutes,"INSERT",now(),USER(),"ROUTES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_UPDATE` AFTER UPDATE ON `routes` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idroutes,"UPDATE",now(),USER(),"ROUTES TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_DELETE` AFTER DELETE ON `routes` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idroutes,"DELETE",now(),USER(),"ROUTES TABLE");
+END$$
+
+
+DELIMITER ;
 SET SQL_MODE = '';
 DROP USER IF EXISTS viewer1;
 SET SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
@@ -474,9 +598,9 @@ INSERT INTO type_of_vehicles(type) VALUES
   ("truck");
 
 INSERT INTO vehicles(type_of_vehicles_idtype_of_vehicles, identifier, storage_size,free) VALUES
-  (1, "FGG342", 800,1),
-  (2, "ASF312", 1200,1),
-  (4, "LKJ098", 100,1);
+  (1, "FGG342", 800,0),
+  (2, "ASF312", 1200,0),
+  (4, "LKJ098", 100,0);
 
 INSERT INTO typeoflocation(type) VALUES
   ("handling"), -- when the customer gives the package
@@ -512,47 +636,47 @@ INSERT INTO type_of_user(type_of_user) VALUES
   ("receiver");
 
 INSERT INTO postnord.user(type_of_user,firstname,secondname,companyname,email,phone,address,zip_city_city_idcity,zip_city_zipcode_idzipcode,duns,password) VALUES
-  (1,"Illana","Colon","Nec Quam Curabitur Industries","bibendum@outlook.couk","(036247) 542513","Ap #321-4086 Ante Rd.",1,2,"663645585","password123"),
-  (1,"Ira","Nelson","Eu Metus Inc.","eleifend@google.org","(018) 63817966","123-1119 Mi. St.",1,2,"689655715","password123"),
-  (1,"Charissa","Rivas","Donec Est Incorporated","adipiscing.ligula@protonmail.ca","(0686) 13656217","P.O. Box 686, 6312 Adipiscing. Rd.",1,2,"103070737","password123"),
-  (1,"Brendan","Whitney","Volutpat Institute","non.bibendum.sed@yahoo.org","(0428) 75196853","655-3508 Sit St.",1,2,"962549849","password123"),
-  (1,"Leo","Vincent","Nulla Foundation","curabitur.egestas@yahoo.couk","(0155) 57355997","Ap #824-5162 Nunc Rd.",1,2,"732450511","password123"),
-  (1,"John","Mitchell","Et Ipsum Cursus Corp.","metus.sit.amet@icloud.couk","(035834) 869237","Ap #764-6103 Lacinia Avenue",1,2,"917715724","password123"),
-  (1,"Vielka","Cruz","Massa Suspendisse Incorporated","mauris.erat.eget@hotmail.ca","(038176) 512071","Ap #416-574 Sociis Street",1,2,"248821411","password123"),
-  (1,"Gretchen","Briggs","Nunc Sed Orci Institute","nisl.nulla.eu@aol.org","(035189) 067288","658-1617 Rutrum Road",1,2,"115282127","password123"),
-  (1,"Quentin","Fitzpatrick","Scelerisque Sed Limited","ipsum.porta@google.org","(075) 42871843","P.O. Box 868, 3742 Et Ave",1,2,"785893285","password123"),
-  (1,"Logan","Carr","In LLC","aliquam.erat.volutpat@outlook.net","(00377) 6613826","Ap #970-3159 Cursus Street",2,1,"655362775","password123"),
-  (1,"Herrod","Hale","Orci Inc.","sem.eget@hotmail.net","(066) 71788596","8509 Donec St.",2,1,"888205255","password123"),
-  (1,"Astra","Wong","Blandit Limited","magnis.dis@outlook.com","(082) 47713827","185-1652 Non, Ave",2,1,"716139384","password123"),
-  (1,"Eagan","Beach","Eget Odio Corp.","fusce.aliquam.enim@outlook.edu","(0600) 45510471","828-2585 Velit. Road",2,1,"653537749","password123"),
-  (1,"Lareina","Terrell","Ipsum Non Institute","blandit.mattis.cras@aol.couk","(076) 12829047","2850 Integer Street",2,1,"688354131","password123"),
-  (1,"Neve","Duke","Mauris Sapien Consulting","ac.facilisis@icloud.couk","(098) 04166369","8480 Vel, Avenue",2,1,"332783477","password123"),
-  (1,"Blake","Guzman","Lectus Convallis Industries","congue.turpis.in@yahoo.edu","(08386) 6857436","Ap #409-5384 Hendrerit Rd.",2,1,"731849459","password123"),
-  (1,"Brianna","Bauer","Id Mollis LLP","sit.amet.nulla@yahoo.net","(0520) 77199559","P.O. Box 433, 7199 Erat Rd.",2,1,"573872224","password123"),
-  (1,"Macey","Jones","Ipsum LLP","a@hotmail.edu","(034271) 753787","P.O. Box 232, 3875 Duis St.",2,1,"237988745","password123"),
-  (1,"Amir","Walter","Sodales PC","diam.luctus.lobortis@aol.net","(035709) 116497","887-1400 Rutrum St.",3,1,"312791777","password123"),
-  (1,"Yeo","Bowen","Feugiat Placerat Velit Corporation","dictum.eleifend.nunc@outlook.couk","(028) 52648152","321-2481 Tincidunt. Rd.",3,1,"614565692","password123"),
-  (1,"Garrett","Moody","Enim Sit Limited","commodo@yahoo.net","(024) 47830724","7296 Non, Road",3,1,"247542148","password123"),
-  (1,"Lila","Garcia","Amet Diam Eu Institute","natoque@google.couk","(053) 82815905","615-721 Semper St.",3,1,"842516418","password123"),
-  (1,"Rashad","Cantu","Lectus Associates","egestas.hendrerit.neque@hotmail.org","(0803) 71893081","Ap #941-6870 Sed Av.",3,1,"754390473","password123"),
-  (1,"Jarrod","Winters","Purus Foundation","lacinia@yahoo.ca","(0944) 68301535","Ap #964-7599 Nec Rd.",3,1,"923785342","password123"),
-  (1,"Lamar","Freeman","Massa Integer Vitae Foundation","augue.porttitor@outlook.edu","(055) 78425671","6122 Ipsum Av.",3,1,"220428504","password123"),
-  (1,"Wynter","Moon","Sem Inc.","sollicitudin.commodo@protonmail.edu","(0735) 01336834","Ap #279-1295 Pharetra Rd.",3,1,"833088360","password123"),
-  (1,"Judith","Alexander","Ut Pellentesque LLP","tristique.senectus.et@icloud.org","(0492) 32456342","P.O. Box 960, 9595 Ligula. St.",3,1,"147312258","password123"),
-  (1,"Ursula","Ferrell","Natoque Penatibus Et Institute","cras@yahoo.couk","(064) 55624649","Ap #416-4407 Auctor Rd.",3,1,"503515131","password123"),
-  (1,"Hasad","Shaw","Ac Metus Vitae Institute","nunc.in@hotmail.couk","(039540) 465572","P.O. Box 606, 8237 Ultrices. Av.",3,1,"563336760","password123"),
-  (1,"Rudyard","Decker","Vestibulum Nec Euismod Industries","aliquet.lobortis@protonmail.ca","(037716) 105586","404-8987 Curae St.",3,1,"887137685","password123"),
-  (1,"Mohammad","Mcdaniel","In Limited","nascetur.ridiculus.mus@protonmail.net","(078) 88518774","9846 Phasellus Av.",3,1,"843785477","password123"),
-  (1,"Adam","O'Neill","Justo Eu Arcu Industries","in.ornare@protonmail.net","(06671) 3757971","P.O. Box 403, 6700 Ligula. St.",3,1,"104809712","password123"),
-  (1,"Kiayada","Huffman","Donec Elementum PC","montes@google.couk","(0443) 18239656","P.O. Box 630, 2091 Vestibulum Av.",3,1,"642381371","password123"),
-  (1,"Tanek","Powers","Adipiscing Lacus Ut Inc.","ultricies.dignissim@outlook.ca","(02825) 3324115","P.O. Box 362, 3312 Eu, Avenue",3,1,"566357423","password123"),
-  (1,"Aspen","Day","Orci In Consequat Ltd","quis.lectus@hotmail.ca","(0087) 87685325","146-5610 Ante. Av.",2,1,"766622781","password123"),
-  (1,"Aladdin","Gallagher","Integer Institute","interdum.enim@protonmail.com","(0702) 45341617","706-2449 Donec Rd.",2,1,"711563815","password123"),
-  (1,"Joel","Bailey","Iaculis Lacus Inc.","molestie.sodales.mauris@google.couk","(0517) 23615846","232-6237 Ornare St.",2,1,"641103494","password123"),
-  (1,"Jerry","Burgess","Vestibulum Mauris Magna LLC","arcu.sed@outlook.edu","(037829) 848034","Ap #584-9132 Ipsum St.",2,1,"838541356","password123"),
-  (1,"Blaze","Mcguire","Erat Consulting","pede.suspendisse.dui@icloud.couk","(032043) 138856","616-7686 Scelerisque St.",1,2,"887915428","password123"),
-  (1,"Ulysses","Stout","Ipsum Inc.","vivamus.euismod.urna@outlook.com","(0862) 39767247","3586 Sollicitudin Av.",1,2,"677867836","password123"),
-  (1,"Pearl","Wise","Sed Eu Eros Ltd","morbi@hotmail.couk","(030523) 386747","781 Pede Road",1,2,"946857319","password123");
+  (1,"Illana","Colon","Nec Quam Curabitur Industries","bibendum@outlook.couk","(036247) 542513","Ap #321-4086 Ante Rd.",1,2,"663645585","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Ira","Nelson","Eu Metus Inc.","eleifend@google.org","(018) 63817966","123-1119 Mi. St.",1,2,"689655715","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Charissa","Rivas","Donec Est Incorporated","adipiscing.ligula@protonmail.ca","(0686) 13656217","P.O. Box 686, 6312 Adipiscing. Rd.",1,2,"103070737","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Brendan","Whitney","Volutpat Institute","non.bibendum.sed@yahoo.org","(0428) 75196853","655-3508 Sit St.",1,2,"962549849","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Leo","Vincent","Nulla Foundation","curabitur.egestas@yahoo.couk","(0155) 57355997","Ap #824-5162 Nunc Rd.",1,2,"732450511","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"John","Mitchell","Et Ipsum Cursus Corp.","metus.sit.amet@icloud.couk","(035834) 869237","Ap #764-6103 Lacinia Avenue",1,2,"917715724","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Vielka","Cruz","Massa Suspendisse Incorporated","mauris.erat.eget@hotmail.ca","(038176) 512071","Ap #416-574 Sociis Street",1,2,"248821411","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Gretchen","Briggs","Nunc Sed Orci Institute","nisl.nulla.eu@aol.org","(035189) 067288","658-1617 Rutrum Road",1,2,"115282127","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Quentin","Fitzpatrick","Scelerisque Sed Limited","ipsum.porta@google.org","(075) 42871843","P.O. Box 868, 3742 Et Ave",1,2,"785893285","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Logan","Carr","In LLC","aliquam.erat.volutpat@outlook.net","(00377) 6613826","Ap #970-3159 Cursus Street",2,1,"655362775","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Herrod","Hale","Orci Inc.","sem.eget@hotmail.net","(066) 71788596","8509 Donec St.",2,1,"888205255","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Astra","Wong","Blandit Limited","magnis.dis@outlook.com","(082) 47713827","185-1652 Non, Ave",2,1,"716139384","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Eagan","Beach","Eget Odio Corp.","fusce.aliquam.enim@outlook.edu","(0600) 45510471","828-2585 Velit. Road",2,1,"653537749","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Lareina","Terrell","Ipsum Non Institute","blandit.mattis.cras@aol.couk","(076) 12829047","2850 Integer Street",2,1,"688354131","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Neve","Duke","Mauris Sapien Consulting","ac.facilisis@icloud.couk","(098) 04166369","8480 Vel, Avenue",2,1,"332783477","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Blake","Guzman","Lectus Convallis Industries","congue.turpis.in@yahoo.edu","(08386) 6857436","Ap #409-5384 Hendrerit Rd.",2,1,"731849459","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Brianna","Bauer","Id Mollis LLP","sit.amet.nulla@yahoo.net","(0520) 77199559","P.O. Box 433, 7199 Erat Rd.",2,1,"573872224","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Macey","Jones","Ipsum LLP","a@hotmail.edu","(034271) 753787","P.O. Box 232, 3875 Duis St.",2,1,"237988745","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Amir","Walter","Sodales PC","diam.luctus.lobortis@aol.net","(035709) 116497","887-1400 Rutrum St.",3,1,"312791777","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Yeo","Bowen","Feugiat Placerat Velit Corporation","dictum.eleifend.nunc@outlook.couk","(028) 52648152","321-2481 Tincidunt. Rd.",3,1,"614565692","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Garrett","Moody","Enim Sit Limited","commodo@yahoo.net","(024) 47830724","7296 Non, Road",3,1,"247542148","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Lila","Garcia","Amet Diam Eu Institute","natoque@google.couk","(053) 82815905","615-721 Semper St.",3,1,"842516418","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Rashad","Cantu","Lectus Associates","egestas.hendrerit.neque@hotmail.org","(0803) 71893081","Ap #941-6870 Sed Av.",3,1,"754390473","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Jarrod","Winters","Purus Foundation","lacinia@yahoo.ca","(0944) 68301535","Ap #964-7599 Nec Rd.",3,1,"923785342","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Lamar","Freeman","Massa Integer Vitae Foundation","augue.porttitor@outlook.edu","(055) 78425671","6122 Ipsum Av.",3,1,"220428504","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Wynter","Moon","Sem Inc.","sollicitudin.commodo@protonmail.edu","(0735) 01336834","Ap #279-1295 Pharetra Rd.",3,1,"833088360","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Judith","Alexander","Ut Pellentesque LLP","tristique.senectus.et@icloud.org","(0492) 32456342","P.O. Box 960, 9595 Ligula. St.",3,1,"147312258","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Ursula","Ferrell","Natoque Penatibus Et Institute","cras@yahoo.couk","(064) 55624649","Ap #416-4407 Auctor Rd.",3,1,"503515131","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Hasad","Shaw","Ac Metus Vitae Institute","nunc.in@hotmail.couk","(039540) 465572","P.O. Box 606, 8237 Ultrices. Av.",3,1,"563336760","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Rudyard","Decker","Vestibulum Nec Euismod Industries","aliquet.lobortis@protonmail.ca","(037716) 105586","404-8987 Curae St.",3,1,"887137685","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Mohammad","Mcdaniel","In Limited","nascetur.ridiculus.mus@protonmail.net","(078) 88518774","9846 Phasellus Av.",3,1,"843785477","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Adam","O'Neill","Justo Eu Arcu Industries","in.ornare@protonmail.net","(06671) 3757971","P.O. Box 403, 6700 Ligula. St.",3,1,"104809712","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Kiayada","Huffman","Donec Elementum PC","montes@google.couk","(0443) 18239656","P.O. Box 630, 2091 Vestibulum Av.",3,1,"642381371","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Tanek","Powers","Adipiscing Lacus Ut Inc.","ultricies.dignissim@outlook.ca","(02825) 3324115","P.O. Box 362, 3312 Eu, Avenue",3,1,"566357423","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Aspen","Day","Orci In Consequat Ltd","quis.lectus@hotmail.ca","(0087) 87685325","146-5610 Ante. Av.",2,1,"766622781","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Aladdin","Gallagher","Integer Institute","interdum.enim@protonmail.com","(0702) 45341617","706-2449 Donec Rd.",2,1,"711563815","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Joel","Bailey","Iaculis Lacus Inc.","molestie.sodales.mauris@google.couk","(0517) 23615846","232-6237 Ornare St.",2,1,"641103494","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Jerry","Burgess","Vestibulum Mauris Magna LLC","arcu.sed@outlook.edu","(037829) 848034","Ap #584-9132 Ipsum St.",2,1,"838541356","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Blaze","Mcguire","Erat Consulting","pede.suspendisse.dui@icloud.couk","(032043) 138856","616-7686 Scelerisque St.",1,2,"887915428","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Ulysses","Stout","Ipsum Inc.","vivamus.euismod.urna@outlook.com","(0862) 39767247","3586 Sollicitudin Av.",1,2,"677867836","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS"),
+  (1,"Pearl","Wise","Sed Eu Eros Ltd","morbi@hotmail.couk","(030523) 386747","781 Pede Road",1,2,"946857319","$2b$12$bgxcFFePzeiFuKl84XrUhu/aUMYCLG3d8CB8CAQikybTiqxxejqhS");
 
 INSERT INTO packages(`user_iduser`,`weight`,`height`,`width`,`depth`,`fragile`,`electronics`,`oddsized`,`receiver_iduser`) VALUES
   (1,2.01,1.01,3.01,1.01,"0","0","0",2),
