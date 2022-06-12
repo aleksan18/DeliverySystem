@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS `postnord`.`user` (
   `zip_city_zipcode_idzipcode` INT NOT NULL,
   `zip_city_city_idcity` INT NOT NULL,
   `password` VARCHAR(60) NOT NULL,
+  `last_activity_date` DATETIME,
   PRIMARY KEY (`idcustomer`),
   CONSTRAINT `fk_customer_typeofreceiver_customer1`
     FOREIGN KEY (`type_of_user`)
@@ -449,34 +450,9 @@ CREATE TABLE IF NOT EXISTS `postnord`.`audit_table` (
   `action_type` ENUM("INSERT", "UPDATE", "DELETE") NOT NULL,
   `action_date` DATETIME NOT NULL,
   `action_created_by` VARCHAR(255) NOT NULL,
+  `table_affected` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`idrow`, `action_date`, `action_type`))
 ENGINE = InnoDB;
-
-SET SQL_MODE = '';
-DROP USER IF EXISTS viewer1;
-SET SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-CREATE USER 'viewer1' IDENTIFIED BY 'viewer123';
-
-GRANT SELECT ON TABLE postnord.* TO 'viewer1';
-SET SQL_MODE = '';
-DROP USER IF EXISTS developer;
-SET SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-CREATE USER 'developer' IDENTIFIED BY 'developer123';
-
-GRANT CREATE, EVENT, REFERENCES, GRANT OPTION ON postnord.* TO 'developer';
-GRANT CREATE, GRANT OPTION, REFERENCES, ALTER, DELETE, INDEX, INSERT, SELECT, UPDATE, TRIGGER ON TABLE postnord.* TO 'developer';
-SET SQL_MODE = '';
-DROP USER IF EXISTS backend;
-SET SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
-CREATE USER 'backend' IDENTIFIED BY 'backend123';
-
-GRANT DELETE, INSERT, SELECT, UPDATE ON TABLE postnord.* TO 'backend';
-
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
--- begin attached script 'script'
-USE postnord;
 
 INSERT INTO country(name) VALUES
   ("Denmark"),
@@ -617,10 +593,10 @@ INSERT INTO payment(`typeofpayment_idtypeofpayment`,`amount`,`payed`,`prepaid`,`
   (2,8920.01,"0","0","JRcS06cCP3",4);
 
 INSERT INTO deliveries(`packages_idpackages`,`priority`,`payment_idpayment`,`international`,`start_location`,`end_location`,`message`,`estimated_date`,`start_date`,`end_date`,`uid`) VALUES
-  (1,"0",1,"0",1,11,"placerat, augue. Sed molestie. Sed","2021-07-19 03:30:07","2021-07-18 02:51:52","2021-07-20 22:14:59","D332CD90-8A43"),
-  (2,"0",2,"0",2,12,"hi, how is going","2021-07-21 03:30:07","2021-07-19 02:51:52","2021-07-21 22:14:59", "A232CD11-8309"),
-  (3,"1",3,"0",3,13,"","2021-07-26 03:30:07", "2021-07-24 03:30:07", "2021-07-27 03:30:07", "M232CD11-8309"),
-  (4,"1",4,"0",4,14,"blabla","2020-08-23 03:30:07","2020-08-20 03:30:07","2020-08-23 03:30:07", "T732CD11-8309");
+  (1,"0",1,"0",1,11,"placerat, augue. Sed molestie. Sed","2021-07-19 03:30:07","2021-07-18 02:51:52","2021-07-20 22:14:59","Q332D90-843"),
+  (2,"0",2,"0",2,12,"hi, how is going","2021-07-21 03:30:07","2021-07-19 02:51:52","2021-07-21 22:14:59", "Q232CD11-8309"),
+  (3,"1",3,"0",3,13,"","2021-07-26 03:30:07", "2021-07-24 03:30:07", "2021-07-27 03:30:07", "Q232CD11-8309"),
+  (4,"1",4,"0",4,14,"blabla","2020-08-23 03:30:07","2020-08-20 03:30:07","2020-08-23 03:30:07", "Q332CD11-8309");
 
 INSERT INTO typeofroute(type) VALUES
   ("internal"),
@@ -653,43 +629,42 @@ DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_INSERT` $$
 USE `postnord`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_INSERT` AFTER INSERT ON `user` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idcustomer,"INSERT",now(),USER(),"USER TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idcustomer,"INSERT",now(),USER(),"USER TABLE");
 END$$
 
 
-USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_UPDATE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_UPDATE` AFTER UPDATE ON `user` FOR EACH ROW
+CREATE TRIGGER `postnord`.`user_AFTER_UPDATE` AFTER UPDATE ON `user` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idcustomer,"UPDATE",now(),USER(),"USER TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idcustomer,"UPDATE",now(),USER(),"USER TABLE");
 END$$
 
 
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_DELETE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_DELETE` AFTER DELETE ON `user` FOR EACH ROW
+CREATE TRIGGER `postnord`.`user_AFTER_DELETE` AFTER DELETE ON `user` FOR EACH ROW
 BEGIN
-Insert into audit_table values(OLD.idcustomer,"DELETE",now(),USER(),"USER TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(OLD.idcustomer,"DELETE",now(),USER(),"USER TABLE");
 END$$
 
 
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_INSERT` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_INSERT` AFTER INSERT ON `payment` FOR EACH ROW
+CREATE TRIGGER `postnord`.`payment_AFTER_INSERT` AFTER INSERT ON `payment` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idpayment,"INSERT",now(),USER()," PAYMENT TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idpayment,"INSERT",now(),USER()," PAYMENT TABLE");
 END$$
 
 
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_UPDATE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_UPDATE` AFTER UPDATE ON `payment` FOR EACH ROW
+CREATE TRIGGER `postnord`.`payment_AFTER_UPDATE` AFTER UPDATE ON `payment` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idpayment,"UPDATE",now(),USER()," PAYMENT TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idpayment,"UPDATE",now(),USER()," PAYMENT TABLE");
 
 END$$
 
@@ -697,18 +672,18 @@ END$$
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_DELETE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_DELETE` AFTER DELETE ON `payment` FOR EACH ROW
+CREATE TRIGGER `postnord`.`payment_AFTER_DELETE` AFTER DELETE ON `payment` FOR EACH ROW
 BEGIN
-Insert into audit_table values(OLD.idpayment,"DELETE",now(),USER()," PAYMENT TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(OLD.idpayment,"DELETE",now(),USER()," PAYMENT TABLE");
 END$$
 
 
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_INSERT` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_INSERT` AFTER INSERT ON `vehicles` FOR EACH ROW
+CREATE TRIGGER `postnord`.`vehicles_AFTER_INSERT` AFTER INSERT ON `vehicles` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idvehicles,"INSERT",now(),USER(),"VEHICLES TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idvehicles,"INSERT",now(),USER(),"VEHICLES TABLE");
 
 END$$
 
@@ -716,9 +691,9 @@ END$$
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_UPDATE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_UPDATE` AFTER UPDATE ON `vehicles` FOR EACH ROW
+CREATE TRIGGER `postnord`.`vehicles_AFTER_UPDATE` AFTER UPDATE ON `vehicles` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idvehicles,"UPDATE",now(),USER(),"VEHICLES TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idvehicles,"UPDATE",now(),USER(),"VEHICLES TABLE");
 
 END$$
 
@@ -726,18 +701,18 @@ END$$
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_DELETE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_DELETE` AFTER DELETE ON `vehicles` FOR EACH ROW
+CREATE TRIGGER `postnord`.`vehicles_AFTER_DELETE` AFTER DELETE ON `vehicles` FOR EACH ROW
 BEGIN
-Insert into audit_table values(OLD.idvehicles,"DELETE",now(),USER(),"VEHICLES TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(OLD.idvehicles,"DELETE",now(),USER(),"VEHICLES TABLE");
 END$$
 
 
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_INSERT` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_INSERT` AFTER INSERT ON `routes` FOR EACH ROW
+CREATE TRIGGER `postnord`.`routes_AFTER_INSERT` AFTER INSERT ON `routes` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idroutes,"INSERT",now(),USER(),"ROUTES TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idroutes,"INSERT",now(),USER(),"ROUTES TABLE");
 
 END$$
 
@@ -745,19 +720,121 @@ END$$
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_UPDATE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_UPDATE` AFTER UPDATE ON `routes` FOR EACH ROW
+CREATE TRIGGER `postnord`.`routes_AFTER_UPDATE` AFTER UPDATE ON `routes` FOR EACH ROW
 BEGIN
-Insert into audit_table values(NEW.idroutes,"UPDATE",now(),USER(),"ROUTES TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idroutes,"UPDATE",now(),USER(),"ROUTES TABLE");
 END$$
 
 
 USE `postnord`$$
 DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_DELETE` $$
 USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_DELETE` AFTER DELETE ON `routes` FOR EACH ROW
+CREATE TRIGGER `postnord`.`routes_AFTER_DELETE` AFTER DELETE ON `routes` FOR EACH ROW
 BEGIN
-Insert into audit_table values(OLD.idroutes,"DELETE",now(),USER(),"ROUTES TABLE");
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(OLD.idroutes,"DELETE",now(),USER(),"ROUTES TABLE");
 END$$
 
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`deliveries_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`deliveries_AFTER_INSERT` AFTER INSERT ON `deliveries` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.iddeliveries,"INSERT",now(),USER(),"DELIVERIES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`deliveries_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`deliveries_AFTER_UPDATE` AFTER UPDATE ON `deliveries` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.iddeliveries,"UPDATE",now(),USER(),"DELIVERIES TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`driver_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`driver_AFTER_INSERT` AFTER INSERT ON `driver` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idemployees,"INSERT",now(),USER(),"DRIVER TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`driver_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`driver_AFTER_UPDATE` AFTER UPDATE ON `driver` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idemployees,"UPDATE",now(),USER(),"DRIVER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`driver_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`driver_AFTER_DELETE` AFTER DELETE ON `driver` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(OLD.idemployees,"DELETE",now(),USER(),"DRIVER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`location_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`location_AFTER_INSERT` AFTER INSERT ON `location` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idlocation,"INSERT",now(),USER(),"LOCATION TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`location_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`location_AFTER_UPDATE` AFTER UPDATE ON `location` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idlocation,"UPDATE",now(),USER(),"LOCATION TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`location_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`location_AFTER_DELETE` AFTER DELETE ON `location` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(OLD.idlocation,"DELETE",now(),USER(),"LOCATION TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`packages_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`packages_AFTER_INSERT` AFTER INSERT ON `packages` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idpackages,"INSERT",now(),USER(),"PACKAGES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`packages_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`packages_AFTER_UPDATE` AFTER UPDATE ON `packages` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(NEW.idpackages,"UPDATE",now(),USER(),"PACKAGES TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`packages_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE TRIGGER `postnord`.`packages_AFTER_DELETE` AFTER DELETE ON `packages` FOR EACH ROW
+BEGIN
+Insert into audit_table(idrow,action_type,action_date,action_created_by,table_affected) values(OLD.idpackages,"DELETE",now(),USER(),"PACKAGES TABLE");
+END$$
 
 DELIMITER ;
