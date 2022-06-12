@@ -23,9 +23,10 @@ DROP TABLE IF EXISTS `postnord`.`type_of_user` ;
 CREATE TABLE IF NOT EXISTS `postnord`.`type_of_user` (
   `idtypeofuser` INT NOT NULL AUTO_INCREMENT,
   `type_of_user` VARCHAR(20) NOT NULL,
-  PRIMARY KEY (`idtypeofuser`),
-  UNIQUE INDEX `type_of_user_UNIQUE` (`type_of_user` ASC) VISIBLE)
+  PRIMARY KEY (`idtypeofuser`))
 ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX `type_of_user_UNIQUE` ON `postnord`.`type_of_user` (`type_of_user` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -36,9 +37,10 @@ DROP TABLE IF EXISTS `postnord`.`zipcode` ;
 CREATE TABLE IF NOT EXISTS `postnord`.`zipcode` (
   `idzipcode` INT NOT NULL AUTO_INCREMENT,
   `zipcode` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`idzipcode`),
-  UNIQUE INDEX `zipcode_UNIQUE` (`zipcode` ASC) VISIBLE)
+  PRIMARY KEY (`idzipcode`))
 ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX `zipcode_UNIQUE` ON `postnord`.`zipcode` (`zipcode` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -49,9 +51,10 @@ DROP TABLE IF EXISTS `postnord`.`country` ;
 CREATE TABLE IF NOT EXISTS `postnord`.`country` (
   `idcountry` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(35) NOT NULL,
-  PRIMARY KEY (`idcountry`),
-  INDEX `SECONDARY` (`name` ASC) INVISIBLE)
+  PRIMARY KEY (`idcountry`))
 ENGINE = InnoDB;
+
+CREATE INDEX `SECONDARY` ON `postnord`.`country` (`name` ASC) INVISIBLE;
 
 
 -- -----------------------------------------------------
@@ -64,13 +67,14 @@ CREATE TABLE IF NOT EXISTS `postnord`.`city` (
   `country_idcountry` INT NOT NULL,
   `name` VARCHAR(30) NOT NULL,
   PRIMARY KEY (`idcity`),
-  INDEX `fk_city_country1_idx` (`country_idcountry` ASC) VISIBLE,
   CONSTRAINT `fk_city_country1`
     FOREIGN KEY (`country_idcountry`)
     REFERENCES `postnord`.`country` (`idcountry`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `fk_city_country1_idx` ON `postnord`.`city` (`country_idcountry` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -82,7 +86,6 @@ CREATE TABLE IF NOT EXISTS `postnord`.`zip_city` (
   `zipcode_idzipcode` INT NOT NULL,
   `city_idcity` INT NOT NULL,
   PRIMARY KEY (`zipcode_idzipcode`, `city_idcity`),
-  INDEX `fk_zip_city_city1_idx` (`city_idcity` ASC) VISIBLE,
   CONSTRAINT `fk_zip_city_zipcode1`
     FOREIGN KEY (`zipcode_idzipcode`)
     REFERENCES `postnord`.`zipcode` (`idzipcode`)
@@ -94,6 +97,8 @@ CREATE TABLE IF NOT EXISTS `postnord`.`zip_city` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `fk_zip_city_city1_idx` ON `postnord`.`zip_city` (`city_idcity` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -115,10 +120,6 @@ CREATE TABLE IF NOT EXISTS `postnord`.`user` (
   `zip_city_city_idcity` INT NOT NULL,
   `password` VARCHAR(60) NOT NULL,
   PRIMARY KEY (`idcustomer`),
-  INDEX `fk_customer_typeofreceiver_customer1_idx` (`type_of_user` ASC) VISIBLE,
-  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
-  UNIQUE INDEX `cvr_UNIQUE` (`duns` ASC) VISIBLE,
-  INDEX `fk_user_zip_city1_idx` (`zip_city_zipcode_idzipcode` ASC, `zip_city_city_idcity` ASC) VISIBLE,
   CONSTRAINT `fk_customer_typeofreceiver_customer1`
     FOREIGN KEY (`type_of_user`)
     REFERENCES `postnord`.`type_of_user` (`idtypeofuser`)
@@ -130,6 +131,14 @@ CREATE TABLE IF NOT EXISTS `postnord`.`user` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `fk_customer_typeofreceiver_customer1_idx` ON `postnord`.`user` (`type_of_user` ASC) VISIBLE;
+
+CREATE UNIQUE INDEX `email_UNIQUE` ON `postnord`.`user` (`email` ASC) VISIBLE;
+
+CREATE UNIQUE INDEX `cvr_UNIQUE` ON `postnord`.`user` (`duns` ASC) VISIBLE;
+
+CREATE INDEX `fk_user_zip_city1_idx` ON `postnord`.`user` (`zip_city_zipcode_idzipcode` ASC, `zip_city_city_idcity` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -149,8 +158,6 @@ CREATE TABLE IF NOT EXISTS `postnord`.`packages` (
   `oddsized` TINYINT NOT NULL,
   `receiver_iduser` INT NULL,
   PRIMARY KEY (`idpackages`),
-  INDEX `fk_packages_customer_idx` (`user_iduser` ASC) VISIBLE,
-  INDEX `fk_packages_user1_idx` (`receiver_iduser` ASC) VISIBLE,
   CONSTRAINT `fk_packages_customer`
     FOREIGN KEY (`user_iduser`)
     REFERENCES `postnord`.`user` (`idcustomer`)
@@ -163,6 +170,10 @@ CREATE TABLE IF NOT EXISTS `postnord`.`packages` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+CREATE INDEX `fk_packages_customer_idx` ON `postnord`.`packages` (`user_iduser` ASC) VISIBLE;
+
+CREATE INDEX `fk_packages_user1_idx` ON `postnord`.`packages` (`receiver_iduser` ASC) VISIBLE;
+
 
 -- -----------------------------------------------------
 -- Table `postnord`.`typeofpayment`
@@ -172,9 +183,10 @@ DROP TABLE IF EXISTS `postnord`.`typeofpayment` ;
 CREATE TABLE IF NOT EXISTS `postnord`.`typeofpayment` (
   `idtypeofpayment` INT NOT NULL AUTO_INCREMENT,
   `typeofpayment` VARCHAR(6) NOT NULL,
-  PRIMARY KEY (`idtypeofpayment`),
-  UNIQUE INDEX `typeofpayment_UNIQUE` (`typeofpayment` ASC) VISIBLE)
+  PRIMARY KEY (`idtypeofpayment`))
 ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX `typeofpayment_UNIQUE` ON `postnord`.`typeofpayment` (`typeofpayment` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -191,14 +203,16 @@ CREATE TABLE IF NOT EXISTS `postnord`.`payment` (
   `transactionid` VARCHAR(20) NULL,
   `billing_address` VARCHAR(70) NOT NULL,
   PRIMARY KEY (`idpayment`),
-  INDEX `fk_payment_typeofpayment1_idx` (`typeofpayment_idtypeofpayment` ASC) VISIBLE,
-  UNIQUE INDEX `transactionid_UNIQUE` (`transactionid` ASC) VISIBLE,
   CONSTRAINT `fk_payment_typeofpayment1`
     FOREIGN KEY (`typeofpayment_idtypeofpayment`)
     REFERENCES `postnord`.`typeofpayment` (`idtypeofpayment`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `fk_payment_typeofpayment1_idx` ON `postnord`.`payment` (`typeofpayment_idtypeofpayment` ASC) VISIBLE;
+
+CREATE UNIQUE INDEX `transactionid_UNIQUE` ON `postnord`.`payment` (`transactionid` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -209,9 +223,10 @@ DROP TABLE IF EXISTS `postnord`.`typeoflocation` ;
 CREATE TABLE IF NOT EXISTS `postnord`.`typeoflocation` (
   `idtypeoflocation` INT NOT NULL AUTO_INCREMENT,
   `type` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`idtypeoflocation`),
-  UNIQUE INDEX `type_UNIQUE` (`type` ASC) VISIBLE)
+  PRIMARY KEY (`idtypeoflocation`))
 ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX `type_UNIQUE` ON `postnord`.`typeoflocation` (`type` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -226,8 +241,6 @@ CREATE TABLE IF NOT EXISTS `postnord`.`location` (
   `zip_city_zipcode_idzipcode` INT NOT NULL,
   `zip_city_city_idcity` INT NOT NULL,
   PRIMARY KEY (`idlocation`),
-  INDEX `fk_location_typeoflocation1_idx` (`typeoflocation_idtypeoflocation` ASC) VISIBLE,
-  INDEX `fk_location_zip_city1_idx` (`zip_city_zipcode_idzipcode` ASC, `zip_city_city_idcity` ASC) VISIBLE,
   CONSTRAINT `fk_location_typeoflocation1`
     FOREIGN KEY (`typeoflocation_idtypeoflocation`)
     REFERENCES `postnord`.`typeoflocation` (`idtypeoflocation`)
@@ -239,6 +252,10 @@ CREATE TABLE IF NOT EXISTS `postnord`.`location` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `fk_location_typeoflocation1_idx` ON `postnord`.`location` (`typeoflocation_idtypeoflocation` ASC) VISIBLE;
+
+CREATE INDEX `fk_location_zip_city1_idx` ON `postnord`.`location` (`zip_city_zipcode_idzipcode` ASC, `zip_city_city_idcity` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -260,11 +277,6 @@ CREATE TABLE IF NOT EXISTS `postnord`.`deliveries` (
   `end_date` DATETIME NULL,
   `uid` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`iddeliveries`),
-  INDEX `fk_deliveries_packages1_idx` (`packages_idpackages` ASC) VISIBLE,
-  INDEX `fk_deliveries_payment1_idx` (`payment_idpayment` ASC) VISIBLE,
-  INDEX `fk_deliveries_location1_idx` (`start_location` ASC) VISIBLE,
-  INDEX `fk_deliveries_location2_idx` (`end_location` ASC) VISIBLE,
-  UNIQUE INDEX `uid_UNIQUE` (`uid` ASC) VISIBLE,
   CONSTRAINT `fk_deliveries_packages1`
     FOREIGN KEY (`packages_idpackages`)
     REFERENCES `postnord`.`packages` (`idpackages`)
@@ -286,6 +298,16 @@ CREATE TABLE IF NOT EXISTS `postnord`.`deliveries` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `fk_deliveries_packages1_idx` ON `postnord`.`deliveries` (`packages_idpackages` ASC) VISIBLE;
+
+CREATE INDEX `fk_deliveries_payment1_idx` ON `postnord`.`deliveries` (`payment_idpayment` ASC) VISIBLE;
+
+CREATE INDEX `fk_deliveries_location1_idx` ON `postnord`.`deliveries` (`start_location` ASC) VISIBLE;
+
+CREATE INDEX `fk_deliveries_location2_idx` ON `postnord`.`deliveries` (`end_location` ASC) VISIBLE;
+
+CREATE UNIQUE INDEX `uid_UNIQUE(9)` ON `postnord`.`deliveries` (`uid` ASC) INVISIBLE;
 
 
 -- -----------------------------------------------------
@@ -312,9 +334,10 @@ DROP TABLE IF EXISTS `postnord`.`type_of_vehicles` ;
 CREATE TABLE IF NOT EXISTS `postnord`.`type_of_vehicles` (
   `idtype_of_vehicles` INT NOT NULL AUTO_INCREMENT,
   `type` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`idtype_of_vehicles`),
-  UNIQUE INDEX `type_UNIQUE` (`type` ASC) VISIBLE)
+  PRIMARY KEY (`idtype_of_vehicles`))
 ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX `type_UNIQUE` ON `postnord`.`type_of_vehicles` (`type` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -329,13 +352,14 @@ CREATE TABLE IF NOT EXISTS `postnord`.`vehicles` (
   `storage_size` INT NOT NULL,
   `free` TINYINT NOT NULL,
   PRIMARY KEY (`idvehicles`),
-  INDEX `fk_vehicles_type_of_vehicles1_idx` (`type_of_vehicles_idtype_of_vehicles` ASC) VISIBLE,
   CONSTRAINT `fk_vehicles_type_of_vehicles1`
     FOREIGN KEY (`type_of_vehicles_idtype_of_vehicles`)
     REFERENCES `postnord`.`type_of_vehicles` (`idtype_of_vehicles`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
+
+CREATE INDEX `fk_vehicles_type_of_vehicles1_idx` ON `postnord`.`vehicles` (`type_of_vehicles_idtype_of_vehicles` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -346,9 +370,10 @@ DROP TABLE IF EXISTS `postnord`.`typeofroute` ;
 CREATE TABLE IF NOT EXISTS `postnord`.`typeofroute` (
   `idtypeofroute` INT NOT NULL AUTO_INCREMENT,
   `type` VARCHAR(10) NOT NULL,
-  PRIMARY KEY (`idtypeofroute`),
-  UNIQUE INDEX `type_UNIQUE` (`type` ASC) VISIBLE)
+  PRIMARY KEY (`idtypeofroute`))
 ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX `type_UNIQUE` ON `postnord`.`typeofroute` (`type` ASC) VISIBLE;
 
 
 -- -----------------------------------------------------
@@ -369,12 +394,6 @@ CREATE TABLE IF NOT EXISTS `postnord`.`routes` (
   `start_date` DATETIME NOT NULL,
   `end_date` DATETIME NULL,
   PRIMARY KEY (`idroutes`),
-  INDEX `fk_routes_vehicles1_idx` (`vehicles_idvehicles` ASC) VISIBLE,
-  INDEX `fk_routes_employees1_idx` (`employees_idemployees` ASC) VISIBLE,
-  INDEX `fk_routes_typeofroute1_idx` (`typeofroute_idtypeofroute` ASC) VISIBLE,
-  INDEX `fk_routes_location1_idx` (`start_location` ASC) VISIBLE,
-  INDEX `fk_routes_location2_idx` (`end_location` ASC) VISIBLE,
-  INDEX `fk_routes_deliveries1_idx` (`deliveries_iddeliveries` ASC) VISIBLE,
   CONSTRAINT `fk_routes_vehicles1`
     FOREIGN KEY (`vehicles_idvehicles`)
     REFERENCES `postnord`.`vehicles` (`idvehicles`)
@@ -407,6 +426,19 @@ CREATE TABLE IF NOT EXISTS `postnord`.`routes` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+CREATE INDEX `fk_routes_vehicles1_idx` ON `postnord`.`routes` (`vehicles_idvehicles` ASC) VISIBLE;
+
+CREATE INDEX `fk_routes_employees1_idx` ON `postnord`.`routes` (`employees_idemployees` ASC) VISIBLE;
+
+CREATE INDEX `fk_routes_typeofroute1_idx` ON `postnord`.`routes` (`typeofroute_idtypeofroute` ASC) VISIBLE;
+
+CREATE INDEX `fk_routes_location1_idx` ON `postnord`.`routes` (`start_location` ASC) VISIBLE;
+
+CREATE INDEX `fk_routes_location2_idx` ON `postnord`.`routes` (`end_location` ASC) VISIBLE;
+
+CREATE INDEX `fk_routes_deliveries1_idx` ON `postnord`.`routes` (`deliveries_iddeliveries` ASC) VISIBLE;
+
+
 -- -----------------------------------------------------
 -- Table `postnord`.`audit_table`
 -- -----------------------------------------------------
@@ -420,123 +452,6 @@ CREATE TABLE IF NOT EXISTS `postnord`.`audit_table` (
   PRIMARY KEY (`idrow`, `action_date`, `action_type`))
 ENGINE = InnoDB;
 
-USE `postnord`;
-
-DELIMITER $$
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_INSERT` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_INSERT` AFTER INSERT ON `user` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idcustomer,"INSERT",now(),USER(),"USER TABLE");
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_UPDATE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_UPDATE` AFTER UPDATE ON `user` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idcustomer,"UPDATE",now(),USER(),"USER TABLE");
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_DELETE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_DELETE` AFTER DELETE ON `user` FOR EACH ROW
-BEGIN
-Insert into audit_table values(OLD.idcustomer,"DELETE",now(),USER(),"USER TABLE");
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_INSERT` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_INSERT` AFTER INSERT ON `payment` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idpayment,"INSERT",now(),USER()," PAYMENT TABLE");
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_UPDATE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_UPDATE` AFTER UPDATE ON `payment` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idpayment,"UPDATE",now(),USER()," PAYMENT TABLE");
-
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_DELETE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_DELETE` AFTER DELETE ON `payment` FOR EACH ROW
-BEGIN
-Insert into audit_table values(OLD.idpayment,"DELETE",now(),USER()," PAYMENT TABLE");
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_INSERT` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_INSERT` AFTER INSERT ON `vehicles` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idvehicles,"INSERT",now(),USER(),"VEHICLES TABLE");
-
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_UPDATE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_UPDATE` AFTER UPDATE ON `vehicles` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idvehicles,"UPDATE",now(),USER(),"VEHICLES TABLE");
-
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_DELETE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_DELETE` AFTER DELETE ON `vehicles` FOR EACH ROW
-BEGIN
-Insert into audit_table values(OLD.idvehicles,"DELETE",now(),USER(),"VEHICLES TABLE");
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_INSERT` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_INSERT` AFTER INSERT ON `routes` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idroutes,"INSERT",now(),USER(),"ROUTES TABLE");
-
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_UPDATE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_UPDATE` AFTER UPDATE ON `routes` FOR EACH ROW
-BEGIN
-Insert into audit_table values(NEW.idroutes,"UPDATE",now(),USER(),"ROUTES TABLE");
-END$$
-
-
-USE `postnord`$$
-DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_DELETE` $$
-USE `postnord`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_DELETE` AFTER DELETE ON `routes` FOR EACH ROW
-BEGIN
-Insert into audit_table values(OLD.idroutes,"DELETE",now(),USER(),"ROUTES TABLE");
-END$$
-
-
-DELIMITER ;
 SET SQL_MODE = '';
 DROP USER IF EXISTS viewer1;
 SET SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
@@ -596,11 +511,11 @@ INSERT INTO type_of_vehicles(type) VALUES
   ("van"),
   ("bike"),
   ("truck");
+INSERT INTO vehicles(type_of_vehicles_idtype_of_vehicles,identifier,storage_size,free) VALUES
+  (1,"FGG342", 800,0),
+  (1,"ASF312", 1200,0),
+  (1,"LKJ098", 100,0);
 
-INSERT INTO vehicles(type_of_vehicles_idtype_of_vehicles, identifier, storage_size,free) VALUES
-  (1, "FGG342", 800,0),
-  (2, "ASF312", 1200,0),
-  (4, "LKJ098", 100,0);
 
 INSERT INTO typeoflocation(type) VALUES
   ("handling"), -- when the customer gives the package
@@ -728,3 +643,121 @@ INSERT INTO routes(`vehicles_idvehicles`,`employees_idemployees`,`typeofroute_id
   
 
 -- end attached script 'script'
+
+USE `postnord`;
+
+DELIMITER $$
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_INSERT` AFTER INSERT ON `user` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idcustomer,"INSERT",now(),USER(),"USER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_UPDATE` AFTER UPDATE ON `user` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idcustomer,"UPDATE",now(),USER(),"USER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`user_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`user_AFTER_DELETE` AFTER DELETE ON `user` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idcustomer,"DELETE",now(),USER(),"USER TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_INSERT` AFTER INSERT ON `payment` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idpayment,"INSERT",now(),USER()," PAYMENT TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_UPDATE` AFTER UPDATE ON `payment` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idpayment,"UPDATE",now(),USER()," PAYMENT TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`payment_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`payment_AFTER_DELETE` AFTER DELETE ON `payment` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idpayment,"DELETE",now(),USER()," PAYMENT TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_INSERT` AFTER INSERT ON `vehicles` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idvehicles,"INSERT",now(),USER(),"VEHICLES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_UPDATE` AFTER UPDATE ON `vehicles` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idvehicles,"UPDATE",now(),USER(),"VEHICLES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`vehicles_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`vehicles_AFTER_DELETE` AFTER DELETE ON `vehicles` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idvehicles,"DELETE",now(),USER(),"VEHICLES TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_INSERT` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_INSERT` AFTER INSERT ON `routes` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idroutes,"INSERT",now(),USER(),"ROUTES TABLE");
+
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_UPDATE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_UPDATE` AFTER UPDATE ON `routes` FOR EACH ROW
+BEGIN
+Insert into audit_table values(NEW.idroutes,"UPDATE",now(),USER(),"ROUTES TABLE");
+END$$
+
+
+USE `postnord`$$
+DROP TRIGGER IF EXISTS `postnord`.`routes_AFTER_DELETE` $$
+USE `postnord`$$
+CREATE DEFINER = CURRENT_USER TRIGGER `postnord`.`routes_AFTER_DELETE` AFTER DELETE ON `routes` FOR EACH ROW
+BEGIN
+Insert into audit_table values(OLD.idroutes,"DELETE",now(),USER(),"ROUTES TABLE");
+END$$
+
+
+DELIMITER ;
