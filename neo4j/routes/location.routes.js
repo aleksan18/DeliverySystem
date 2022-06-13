@@ -7,7 +7,7 @@ const router = Router();
 //READ
 router.get('/', function (req, res) {
     session
-        .run('USE postnord MATCH (l:Location) RETURN l')
+        .run('MATCH (l:Location) RETURN l')
         .then(function (result) {
             const responsemap = result.records.map(function (record) {
                 console.log(record._fields[0].properties);
@@ -26,7 +26,7 @@ router.post('/', function (req, res) {
     const { location } = req.body;
     console.log(location);
     session
-        .run(`use postnord CREATE (l:Location {address: "${location.address}", city: "${location.city}",
+        .run(`CREATE (l:Location {address: "${location.address}", city: "${location.city}",
             country: "${location.country}", note: "${location.note}", zip: "${location.zip}" }) RETURN l;`)
         .then(function (result) {
             const responsemap = result.records.map(function (record) {
@@ -47,7 +47,7 @@ router.put('/', function (req, res) {
     const { location } = req.body;
     console.log(location);
     session
-        .run(`use postnord MATCH (l:Location {city: "${location.city}", country: "${location.country}"}) SET l.address = "${location.address}",
+        .run(`MATCH (l:Location {city: "${location.city}", country: "${location.country}"}) SET l.address = "${location.address}",
         l.city = "${location.city}", l.country = "${location.country}",
         l.note = "${location.note}", l.zip = "${location.zip}" RETURN l`)
         .then(function (result) {
@@ -70,7 +70,7 @@ router.delete('/', function (req, res) {
     const { cityaddress } = req.body;
     console.log(`Deleting Address with Address ${cityaddress.address} in ${cityaddress.city}`)
     session.run(
-        `use postnord MATCH (l:Location{address: "${cityaddress.address}", city: "${cityaddress.city}"}) DELETE l`
+        `MATCH (l:Location{address: "${cityaddress.address}", city: "${cityaddress.city}"}) DELETE l`
     )
         .then(function () {
             console.log(`Address ${cityaddress.address} Deleted`)

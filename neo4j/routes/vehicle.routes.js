@@ -8,7 +8,7 @@ const router = Router();
 //READ
 router.get('/', function (req, res) {
     session
-        .run('USE postnord MATCH (r:Vehicle) RETURN r')
+        .run('MATCH (r:Vehicle) RETURN r')
         .then(function (result) {
             const responsemap = result.records.map(function (record) {
                 console.log(record._fields[0].properties);
@@ -27,7 +27,7 @@ router.post('/', function (req, res) {
     const { vehicle } = req.body;
     console.log(vehicle);
     session
-        .run(`use postnord CREATE (r:Vehicle {identifier: "${vehicle.identifier}", type: "${vehicle.type}", free : "${vehicle.free}", storage : "${vehicle.storage}"}) RETURN r`)
+        .run(`CREATE (r:Vehicle {identifier: "${vehicle.identifier}", type: "${vehicle.type}", free : "${vehicle.free}", storage : "${vehicle.storage}"}) RETURN r`)
         .then(function (result) {
             const responsemap = result.records.map(function (record) {
                 console.log(record._fields[0].properties);
@@ -47,7 +47,7 @@ router.put('/', function (req, res) {
     const { vehicle } = req.body;
     console.log(vehicle);
     session
-        .run(`use postnord MATCH (r:Vehicle {identifier: "${vehicle.identifier}"}) SET r.type = "${vehicle.type}", r.free = "${vehicle.free}", r.storage = "${vehicle.storage}" RETURN r`)
+        .run(`MATCH (r:Vehicle {identifier: "${vehicle.identifier}"}) SET r.type = "${vehicle.type}", r.free = "${vehicle.free}", r.storage = "${vehicle.storage}" RETURN r`)
         .then(function (result) {
             const responsemap = result.records.map(function (record) {
                 console.log(record._fields[0].properties);
@@ -67,7 +67,7 @@ router.delete('/', function (req, res) {
     const { identifier } = req.body;
     console.log(`Deleting Vehicle with identifier ${identifier}`)
     session.run(
-        `use postnord MATCH (r:Vehicle{identifier: "${identifier}"}) DELETE r`
+        `MATCH (r:Vehicle{identifier: "${identifier}"}) DELETE r`
     )
         .then(function () {
             console.log(`Vehicle ${identifier} Deleted`)

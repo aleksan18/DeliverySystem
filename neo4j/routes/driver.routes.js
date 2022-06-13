@@ -8,7 +8,7 @@ const router = Router();
 //READ
 router.get('/', function (req, res) {
     session
-        .run('USE postnord MATCH (d:Driver) RETURN d')
+        .run('MATCH (d:Driver) RETURN d')
         .then(function (result) {
             const responsemap = result.records.map(function (record) {
                 console.log(record._fields[0].properties);
@@ -27,7 +27,7 @@ router.post('/', function (req, res) {
     const { driver } = req.body;
     console.log(driver);
     session
-        .run(`use postnord CREATE (d:Driver {email: "${driver.email}", first_name: "${driver.first_name}",
+        .run(`CREATE (d:Driver {email: "${driver.email}", first_name: "${driver.first_name}",
                 free : "${driver.free}", last_name : "${driver.last_name}", phone : "${driver.phone}"}) 
             RETURN d`)
         .then(function (result) {
@@ -49,7 +49,7 @@ router.put('/', function (req, res) {
     const { driver } = req.body;
     console.log(driver);
     session
-        .run(`use postnord MATCH (d:Driver {email: "${driver.email}"}) SET d.first_name = "${driver.first_name}",
+        .run(`MATCH (d:Driver {email: "${driver.email}"}) SET d.first_name = "${driver.first_name}",
         d.free = "${driver.free}", d.last_name = "${driver.last_name}",
          d.phone = "${driver.phone}"
         RETURN d`)
@@ -71,7 +71,7 @@ router.delete('/', function (req, res) {
     const { email } = req.body;
     console.log(`Deleting Driver with email ${email}`)
     session.run(
-        `use postnord MATCH (d:Driver{email: "${email}"}) DELETE d`
+        `MATCH (d:Driver{email: "${email}"}) DELETE d`
     )
         .then(function () {
             res.sendStatus(200)

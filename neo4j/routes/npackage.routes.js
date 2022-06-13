@@ -7,7 +7,7 @@ const router = Router();
 //READ
 router.get('/', function(req,res){
     session
-        .run('USE postnord MATCH (p:Package) RETURN p')
+        .run('MATCH (p:Package) RETURN p')
         .then(function(result){
             const responsemap = result.records.map(function(record){
                 console.log(record._fields[0].properties);
@@ -26,7 +26,7 @@ router.post('/', function(req,res){
     const {npackage} = req.body;
     console.log(npackage);
     session
-    .run(`use postnord CREATE (p:Package {identifier : "${npackage.identifier}", batteries : "${npackage.batteries}",
+    .run(`CREATE (p:Package {identifier : "${npackage.identifier}", batteries : "${npackage.batteries}",
      depth: "${npackage.depth}", fragile: "${npackage.fragile}", height: "${npackage.height}", message: "${npackage.message}", weight : "${npackage.weight}", width : "${npackage.width}"}) RETURN p`)
     .then(function(result){
         const responsemap = result.records.map(function(record){
@@ -47,7 +47,7 @@ router.put('/', function(req,res){
     const {npackage} = req.body;
     console.log(npackage);
     session
-    .run(`use postnord MATCH (p:Package {identifier : "${npackage.identifier}"}) SET p.batteries = "${npackage.batteries}",
+    .run(`MATCH (p:Package {identifier : "${npackage.identifier}"}) SET p.batteries = "${npackage.batteries}",
     p.depth = "${npackage.depth}", p.fragile = "${npackage.fragile}",
     p.height = "${npackage.height}", p.message = "${npackage.message}",
     p.weight = "${npackage.weight}", p.width = "${npackage.width}" RETURN p`)
@@ -70,7 +70,7 @@ router.delete('/', function(req,res){
     const {identifier} = req.body;
     console.log(`Deleting package with identifier ${identifier}`)
     session.run(
-        `use postnord MATCH (p:Package{identifier: "${identifier}"}) DELETE p`
+        `MATCH (p:Package{identifier: "${identifier}"}) DELETE p`
     )
     .then(function(){
         console.log(`Package ${identifier} Deleted`)
